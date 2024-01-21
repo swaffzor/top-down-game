@@ -12,19 +12,50 @@ map.src = './test-map.png'
 
 const playerImage = new Image();
 playerImage.src = './Alex_run_down_16x16.png'
+const spriteCount = 6
+const spriteWidth = 16
 
-map.onload = () => {
-  context.drawImage(map, 0, 0)
+const drawPlayer = () => {
   context.drawImage(
     playerImage,
-    0,                      // cropping 
-    0,                      // cropping 
-    playerImage.width / 6,  // cropping
-    playerImage.height,     // cropping 
-    50,                     // actual
-    125,                    // actual
-    playerImage.width / 6,  // actual
-    playerImage.height,     // actual
+    0 * spriteWidth,                    // cropping x (source image)
+    0,                                  // cropping y
+    playerImage.width / spriteCount,    // cropping width
+    playerImage.height,                 // cropping height
+    position.x,                                // actual x (destination canvas) 
+    position.y,                                // actual y
+    playerImage.width / spriteCount,    // actual width
+    playerImage.height,                 // actual height
   )
 }
 
+map.onload = () => {
+  context.drawImage(map, 0, 0)
+  drawPlayer()
+}
+
+let position = {
+  x: 125,
+  y: 125
+}
+
+window.addEventListener('keydown', (event) => {
+  console.log(event.key)
+  if (event.key === 's') {
+    position.y += 5
+    context.drawImage(map, 0, 0)
+  }
+  if (event.key === 'w') {
+    position.y -= 5
+    context.drawImage(map, 0, 0)
+  }
+  if (event.key === 'a') {
+    position.x -= 5
+    context.drawImage(map, 0, 0)
+  }
+  if (event.key === 'd') {
+    position.x += 5
+    context.drawImage(map, 0, 0)
+  }
+  drawPlayer()
+})
