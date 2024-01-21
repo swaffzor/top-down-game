@@ -22,8 +22,8 @@ const drawPlayer = () => {
     0,                                  // cropping y
     playerImage.width / spriteCount,    // cropping width
     playerImage.height,                 // cropping height
-    position.x,                                // actual x (destination canvas) 
-    position.y,                                // actual y
+    90,                                // actual x (destination canvas) 
+    80,                                // actual y
     playerImage.width / spriteCount,    // actual width
     playerImage.height,                 // actual height
   )
@@ -35,27 +35,30 @@ map.onload = () => {
 }
 
 let position = {
-  x: 125,
-  y: 125
+  x: 0,
+  y: 0
 }
 
 window.addEventListener('keydown', (event) => {
   console.log(event.key)
-  if (event.key === 's') {
-    position.y += 5
-    context.drawImage(map, 0, 0)
+  switch (event.key) {
+    case 's':
+      position.y -= 5
+      break;
+    case 'w':
+      position.y += 5
+      break;
+    case 'a':
+      position.x += 5
+      break;
+    case 'd':
+      position.x -= 5
+      break;
+
+    default:
+      break;
   }
-  if (event.key === 'w') {
-    position.y -= 5
-    context.drawImage(map, 0, 0)
-  }
-  if (event.key === 'a') {
-    position.x -= 5
-    context.drawImage(map, 0, 0)
-  }
-  if (event.key === 'd') {
-    position.x += 5
-    context.drawImage(map, 0, 0)
-  }
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(map, position.x, position.y)
   drawPlayer()
 })
