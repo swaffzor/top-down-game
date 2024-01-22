@@ -91,6 +91,30 @@ window.addEventListener('keyup', (event) => {
   }
 })
 
+const move = (direction) => {
+  switch (direction) {
+    case "up":
+      keys.w.pressed = true
+      break;
+    case "down":
+      keys.s.pressed = true
+      break;
+    case "left":
+      keys.a.pressed = true
+      break;
+    case "right":
+      keys.d.pressed = true
+      break;
+  }
+}
+
+const stopMoving = () => {
+  keys.w.pressed = false
+  keys.s.pressed = false
+  keys.a.pressed = false
+  keys.d.pressed = false
+}
+
 const keys = {
   w: {
     pressed: false,
@@ -118,29 +142,29 @@ const animate = () => {
     player.direction = 'up'
     player.moving = true
     player.image = player.sprites.up
-    background.position.y += 2
-    foreground.position.y += 2
+    background.position.y += 1
+    foreground.position.y += 1
   }
   if (keys.s.pressed) {
     player.direction = 'down'
     player.moving = true
     player.image = player.sprites.down
-    background.position.y -= 2
-    foreground.position.y -= 2
+    background.position.y -= 1
+    foreground.position.y -= 1
   }
   if (keys.a.pressed) {
     player.direction = 'left'
     player.moving = true
     player.image = player.sprites.left
-    background.position.x += 2
-    foreground.position.x += 2
+    background.position.x += 1
+    foreground.position.x += 1
   }
   if (keys.d.pressed) {
     player.direction = 'right'
     player.moving = true
     player.image = player.sprites.right
-    background.position.x -= 2
-    foreground.position.x -= 2
+    background.position.x -= 1
+    foreground.position.x -= 1
   }
 
   if (!player.moving) {

@@ -4,9 +4,19 @@
   <title>Canvas Example</title>
 </head>
 <body>
-  <canvas id="myCanvas">
+  <canvas id="myCanvas" style="transform: scale(2); image-rendering: pixelated;">
     Your browser does not support the HTML canvas tag.
   </canvas>
+
+  <div style="position: absolute;">
+    <button onmouseup="stopMoving()" onmousedown="move('up')" style="width: 50px; height: 50px; margin-left: 50px;">up</button>
+    <div>
+      <button onmouseup="stopMoving()" onmousedown="move('left')" style="width: 50px; height: 50px">left</button>
+      <button onmouseup="stopMoving()" onmousedown="move('right')" style="width: 50px; height: 50px; margin-left: 46px">right</button>
+    </div>
+    <button onmouseup="stopMoving()" onmousedown="move('down')" style="width: 50px; height: 50px; margin-left: 50px">down</button>
+  </div>
+  
   <script src="classes.js"></script>
   <script src="index.js"></script>
 </body>
