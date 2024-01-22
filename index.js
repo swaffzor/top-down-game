@@ -9,6 +9,11 @@ context.fillRect(0, 0, canvas.width, canvas.height);
 
 const map = new Image();
 map.src = './sprites/test-map.png'
+const background = new Sprite({ image: map, position: { x: 0, y: 0 } })
+
+const foreMap = new Image();
+foreMap.src = './sprites/test-map-foreground.png'
+const foreground = new Sprite({ image: foreMap, position: { x: 0, y: 0 } })
 
 const spriteCount = 6
 const spriteWidth = 16
@@ -30,22 +35,6 @@ playerIdleLeft.src = './sprites/alex/idle_left.png'
 const playerIdleRight = new Image();
 playerIdleRight.src = './sprites/alex/idle_right.png'
 
-const keys = {
-  w: {
-    pressed: false,
-  },
-  a: {
-    pressed: false,
-  },
-  s: {
-    pressed: false,
-  },
-  d: {
-    pressed: false,
-  },
-}
-
-const background = new Sprite({ image: map, position: { x: 0, y: 0 } })
 const player = new Sprite({
   image: playerImageDown,
   position: { x: 80, y: 90 },
@@ -102,11 +91,27 @@ window.addEventListener('keyup', (event) => {
   }
 })
 
+const keys = {
+  w: {
+    pressed: false,
+  },
+  a: {
+    pressed: false,
+  },
+  s: {
+    pressed: false,
+  },
+  d: {
+    pressed: false,
+  },
+}
+
 const animate = () => {
   window.requestAnimationFrame(animate)
   context.fillRect(0, 0, canvas.width, canvas.height);
   background.draw()
   player.draw()
+  foreground.draw()
 
   player.moving = false
   if (keys.w.pressed) {
@@ -114,25 +119,30 @@ const animate = () => {
     player.moving = true
     player.image = player.sprites.up
     background.position.y += 2
+    foreground.position.y += 2
   }
   if (keys.s.pressed) {
     player.direction = 'down'
     player.moving = true
     player.image = player.sprites.down
     background.position.y -= 2
+    foreground.position.y -= 2
   }
   if (keys.a.pressed) {
     player.direction = 'left'
     player.moving = true
     player.image = player.sprites.left
     background.position.x += 2
+    foreground.position.x += 2
   }
   if (keys.d.pressed) {
     player.direction = 'right'
     player.moving = true
     player.image = player.sprites.right
     background.position.x -= 2
+    foreground.position.x -= 2
   }
+
   if (!player.moving) {
     switch (player.direction) {
       case "up":
