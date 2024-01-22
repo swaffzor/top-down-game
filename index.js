@@ -1,19 +1,19 @@
 const canvas = document.getElementById("myCanvas");
 const context = canvas.getContext("2d");
 
-canvas.width = 1024
-canvas.height = 576
+canvas.width = 900 //* 16
+canvas.height = 506 //* 9
 
 context.fillStyle = "#0099cc"
 context.fillRect(0, 0, canvas.width, canvas.height);
 
+const initMapPos = { x: canvas.width / 3 - 104, y: canvas.height / 3 - 104 }
 const map = new Image();
 map.src = './sprites/test-map.png'
-const background = new Sprite({ image: map, position: { x: 0, y: 0 } })
-
+const background = new Sprite({ image: map, position: initMapPos })
 const foreMap = new Image();
 foreMap.src = './sprites/test-map-foreground.png'
-const foreground = new Sprite({ image: foreMap, position: { x: 0, y: 0 } })
+const foreground = new Sprite({ image: foreMap, position: initMapPos })
 
 const spriteCount = 6
 const spriteWidth = 16
@@ -37,7 +37,7 @@ playerIdleRight.src = './sprites/alex/idle_right.png'
 
 const player = new Sprite({
   image: playerImageDown,
-  position: { x: 80, y: 90 },
+  position: { x: canvas.width / 2, y: canvas.height / 2 },
   frames: { max: spriteCount },
   sprites: {
     down: playerImageDown,
