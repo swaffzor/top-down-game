@@ -8,12 +8,27 @@ context.fillStyle = "#0099cc"
 context.fillRect(0, 0, canvas.width, canvas.height);
 
 const map = new Image();
-map.src = './test-map.png'
+map.src = './sprites/test-map.png'
 
 const spriteCount = 6
 const spriteWidth = 16
-const playerImage = new Image();
-playerImage.src = './Alex_run_down_16x16.png'
+const playerImageDown = new Image();
+playerImageDown.src = './sprites/alex/run_down.png'
+const playerImageUp = new Image();
+playerImageUp.src = './sprites/alex/run_up.png'
+const playerImageLeft = new Image();
+playerImageLeft.src = './sprites/alex/run_left.png'
+const playerImageRight = new Image();
+playerImageRight.src = './sprites/alex/run_right.png'
+
+const playerIdleUp = new Image();
+playerIdleUp.src = './sprites/alex/idle_up.png'
+const playerIdleDown = new Image();
+playerIdleDown.src = './sprites/alex/idle_down.png'
+const playerIdleLeft = new Image();
+playerIdleLeft.src = './sprites/alex/idle_left.png'
+const playerIdleRight = new Image();
+playerIdleRight.src = './sprites/alex/idle_right.png'
 
 const keys = {
   w: {
@@ -30,8 +45,22 @@ const keys = {
   },
 }
 
-const background = new Sprite({ image: map, position: { x: 0, y: 0 }, spriteCount: 1, spriteWidth: 1024 })
-const player = new Sprite({ image: playerImage, position: { x: 100, y: 100 }, spriteCount, spriteWidth })
+const background = new Sprite({ image: map, position: { x: 0, y: 0 } })
+const player = new Sprite({
+  image: playerImageDown,
+  position: { x: 80, y: 90 },
+  frames: { max: spriteCount },
+  sprites: {
+    down: playerImageDown,
+    up: playerImageUp,
+    left: playerImageLeft,
+    right: playerImageRight,
+    idleUp: playerIdleUp,
+    idleDown: playerIdleDown,
+    idleLeft: playerIdleLeft,
+    idleRight: playerIdleRight,
+  },
+})
 
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
@@ -79,10 +108,49 @@ const animate = () => {
   background.draw()
   player.draw()
 
-  if (keys.w.pressed) background.position.y += 1
-  if (keys.s.pressed) background.position.y -= 1
-  if (keys.a.pressed) background.position.x += 1
-  if (keys.d.pressed) background.position.x -= 1
+  player.moving = false
+  if (keys.w.pressed) {
+    player.direction = 'up'
+    player.moving = true
+    player.image = player.sprites.up
+    background.position.y += 2
+  }
+  if (keys.s.pressed) {
+    player.direction = 'down'
+    player.moving = true
+    player.image = player.sprites.down
+    background.position.y -= 2
+  }
+  if (keys.a.pressed) {
+    player.direction = 'left'
+    player.moving = true
+    player.image = player.sprites.left
+    background.position.x += 2
+  }
+  if (keys.d.pressed) {
+    player.direction = 'right'
+    player.moving = true
+    player.image = player.sprites.right
+    background.position.x -= 2
+  }
+  if (!player.moving) {
+    switch (player.direction) {
+      case "up":
+        player.image = player.sprites.idleUp
+        break;
+      case "down":
+        player.image = player.sprites.idleDown
+        break;
+      case "left":
+        player.image = player.sprites.idleLeft
+        break;
+      case "right":
+        player.image = player.sprites.idleRight
+        break;
+      default:
+        break;
+    }
+  }
 
 }
 
