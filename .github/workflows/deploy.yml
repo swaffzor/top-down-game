@@ -1,10 +1,6 @@
 # reusable workflow to deploy to S3 and invalidate CloudFront cache
 name: Deploy to S3
 on:
-  push:
-    branches:
-      - main
-
   workflow_call:
     inputs:
       S3_BUCKET:
