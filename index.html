@@ -1,23 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <title>Canvas Example</title>
-</head>
-<body>
-  <canvas id="myCanvas" style="transform: scale(2); image-rendering: pixelated;">
-    Your browser does not support the HTML canvas tag.
-  </canvas>
+  <head>
+    <title>Canvas Example</title>
+    <link rel="stylesheet" type="text/css" href="index.css" />
+  </head>
+  <body>
+    <canvas id="myCanvas">
+      Your browser does not support the HTML canvas tag.
+    </canvas>
 
-  <div style="position: absolute;">
-    <button onmouseup="stopMoving()" onmousedown="move('up')" style="width: 50px; height: 50px; margin-left: 50px;">up</button>
-    <div>
-      <button onmouseup="stopMoving()" onmousedown="move('left')" style="width: 50px; height: 50px">left</button>
-      <button onmouseup="stopMoving()" onmousedown="move('right')" style="width: 50px; height: 50px; margin-left: 46px">right</button>
+    <div class="dpad">
+      <button
+        onmousedown="move('up')"
+        touchstart="move('up')"
+        onmouseup="stopMoving()"
+        touchend="stopMoving()"
+        class="button ml-50"
+      >
+        up
+      </button>
+      <div>
+        <button
+          onmousedown="move('left')"
+          touchstart="move('left')"
+          onmouseup="stopMoving()"
+          touchend="stopMoving()"
+          class="button"
+        >
+          left
+        </button>
+        <button
+          onmousedown="move('right')"
+          touchstart="move('right')"
+          onmouseup="stopMoving()"
+          touchend="stopMoving()"
+          class="button ml-46"
+        >
+          right
+        </button>
+      </div>
+      <button
+        onmousedown="move('down')"
+        touchstart="move('down')"
+        onmouseup="stopMoving()"
+        touchend="stopMoving()"
+        class="button ml-50"
+      >
+        down
+      </button>
     </div>
-    <button onmouseup="stopMoving()" onmousedown="move('down')" style="width: 50px; height: 50px; margin-left: 50px">down</button>
-  </div>
-  
-  <script src="classes.js"></script>
-  <script src="index.js"></script>
-</body>
+
+    <script src="classes.js"></script>
+    <script src="index.js"></script>
+  </body>
 </html>
