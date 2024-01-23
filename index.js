@@ -7,7 +7,7 @@ canvas.height = 506 //* 9
 context.fillStyle = "#0099cc"
 context.fillRect(0, 0, canvas.width, canvas.height);
 
-const initMapPos = { x: canvas.width / 3 - 104, y: canvas.height / 3 - 104 }
+const initMapPos = { x: canvas.width / 3, y: canvas.height / 3 }
 const map = new Image();
 map.src = './sprites/test-map.png'
 const background = new Sprite({ image: map, position: initMapPos })
@@ -36,8 +36,8 @@ const playerIdleRight = new Image();
 playerIdleRight.src = './sprites/alex/idle_right.png'
 
 const player = new Sprite({
-  image: playerImageDown,
-  position: { x: canvas.width / 2, y: canvas.height / 2 },
+  image: playerIdleDown,
+  position: { x: canvas.width / 2 + 10, y: canvas.height / 2 - 10 },
   frames: { max: spriteCount },
   sprites: {
     down: playerImageDown,
