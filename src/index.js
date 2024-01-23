@@ -4,7 +4,7 @@ const context = canvas.getContext("2d");
 canvas.width = 900 //* 16
 canvas.height = 506 //* 9
 
-context.fillStyle = "#0099cc"
+context.fillStyle = "#0099cb"
 context.fillRect(0, 0, canvas.width, canvas.height);
 
 const initMapPos = { x: canvas.width / 4, y: canvas.height / 4 }
