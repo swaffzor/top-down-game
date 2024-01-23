@@ -4,8 +4,12 @@ const context = canvas.getContext("2d");
 canvas.width = 900 //* 16
 canvas.height = 506 //* 9
 
-context.fillStyle = "#0099cc"
+context.fillStyle = "#0099cc" // ocean blue
 context.fillRect(0, 0, canvas.width, canvas.height);
+
+if (window.innerHeight < window.innerWidth) {
+  document.getElementById('dpad').style.display = 'none'
+}
 
 const initMapPos = { x: canvas.width / 4, y: canvas.height / 4 }
 const map = new Image();
