@@ -1,15 +1,26 @@
+#body {
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+  user-select: none; /* Standard syntax */
+}
+
 .button {
-  width: 50px;
-  height: 50px;
+  width: 150px;
+  height: 150px;
   border-radius: 12%;
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+  user-select: none; /* Standard syntax */
 }
 
 .ml-50 {
-  margin-left: 50px;
+  margin-left: 150px;
 }
 
 .ml-46 {
-  margin-left: 46px;
+  margin-left: 146px;
 }
 
 #myCanvas {
@@ -21,8 +32,8 @@
 
 .dpad {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   margin-left: 16px;
-  margin-top: 16px;
+  margin-bottom: 16px;
 }

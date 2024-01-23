@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Canvas Example</title>
+    <title>Dr0ff 🧪🕹️</title>
     <link rel="stylesheet" type="text/css" href="index.css" />
   </head>
   <body>
@@ -10,44 +10,12 @@
     </canvas>
 
     <div class="dpad">
-      <button
-        onmousedown="move('up')"
-        touchstart="move('up')"
-        onmouseup="stopMoving()"
-        touchend="stopMoving()"
-        class="button ml-50"
-      >
-        up
-      </button>
+      <button class="button ml-50" id="button-up">up</button>
       <div>
-        <button
-          onmousedown="move('left')"
-          touchstart="move('left')"
-          onmouseup="stopMoving()"
-          touchend="stopMoving()"
-          class="button"
-        >
-          left
-        </button>
-        <button
-          onmousedown="move('right')"
-          touchstart="move('right')"
-          onmouseup="stopMoving()"
-          touchend="stopMoving()"
-          class="button ml-46"
-        >
-          right
-        </button>
+        <button class="button" id="button-left">left</button>
+        <button class="button ml-46" id="button-right">right</button>
       </div>
-      <button
-        onmousedown="move('down')"
-        touchstart="move('down')"
-        onmouseup="stopMoving()"
-        touchend="stopMoving()"
-        class="button ml-50"
-      >
-        down
-      </button>
+      <button class="button ml-50" id="button-down">down</button>
     </div>
 
     <script src="classes.js"></script>

@@ -7,7 +7,7 @@ canvas.height = 506 //* 9
 context.fillStyle = "#0099cc"
 context.fillRect(0, 0, canvas.width, canvas.height);
 
-const initMapPos = { x: canvas.width / 3, y: canvas.height / 3 }
+const initMapPos = { x: canvas.width / 4, y: canvas.height / 4 }
 const map = new Image();
 map.src = './sprites/test-map.png'
 const background = new Sprite({ image: map, position: initMapPos })
@@ -37,11 +37,11 @@ playerIdleRight.src = './sprites/alex/idle_right.png'
 
 const player = new Sprite({
   image: playerIdleDown,
-  position: { x: canvas.width / 2 + 10, y: canvas.height / 2 - 10 },
+  position: { x: canvas.width / 2, y: canvas.height / 2 },
   frames: { max: spriteCount },
   sprites: {
-    down: playerImageDown,
     up: playerImageUp,
+    down: playerImageDown,
     left: playerImageLeft,
     right: playerImageRight,
     idleUp: playerIdleUp,
@@ -114,6 +114,19 @@ const stopMoving = () => {
   keys.a.pressed = false
   keys.d.pressed = false
 }
+
+const buttonUp = document.getElementById('button-up')
+const buttonDown = document.getElementById('button-down')
+const buttonLeft = document.getElementById('button-left')
+const buttonRight = document.getElementById('button-right')
+buttonUp.addEventListener('touchstart', () => move('up'))
+buttonUp.addEventListener('touchend', stopMoving)
+buttonDown.addEventListener('touchstart', () => move('down'))
+buttonDown.addEventListener('touchend', stopMoving)
+buttonLeft.addEventListener('touchstart', () => move('left'))
+buttonLeft.addEventListener('touchend', stopMoving)
+buttonRight.addEventListener('touchstart', () => move('right'))
+buttonRight.addEventListener('touchend', stopMoving)
 
 const keys = {
   w: {
