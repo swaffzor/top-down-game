@@ -1,0 +1,53 @@
+# reusable workflow to deploy to S3 and invalidate CloudFront cache
+name: Deploy to S3
+on:
+  push:
+    branches:
+      - main
+  workflow_call:
+    inputs:
+      S3_BUCKET:
+        description: 'S3 bucket to deploy to'
+        required: true
+        type: string
+      # CLOUDFRONT_DISTRIBUTION_ID:
+      #   description: 'CloudFront distribution ID'
+      #   required: true
+      #   type: string
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+jobs:
+  deploy:
+    environment: ${{ inputs.environment }}
+    name: Deploy Site
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # - name: Install dependencies
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Delete existing objects
+        run: aws s3 rm s3://${{ inputs.S3_BUCKET }} --recursive
+
+      - name: Upload objects
+        working-directory: .
+        run: aws s3 sync ./src s3://${{ inputs.S3_BUCKET }}/
+
+      # - name: Invalidate CloudFront cache
+      #   run: aws cloudfront create-invalidation --distribution-id ${{ inputs.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
