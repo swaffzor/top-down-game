@@ -4,9 +4,6 @@ const context = canvas.getContext("2d");
 canvas.width = 900 //* 16
 canvas.height = 506 //* 9
 
-context.fillStyle = "#0099cc" // ocean blue
-context.fillRect(0, 0, canvas.width, canvas.height);
-
 if (window.innerHeight < window.innerWidth) {
   document.getElementById('dpad').style.display = 'none'
 }
@@ -41,7 +38,10 @@ playerIdleRight.src = './sprites/alex/idle_right.png'
 
 const player = new Sprite({
   image: playerIdleDown,
-  position: { x: canvas.width / 2, y: canvas.height / 2 },
+  position: {
+    x: canvas.width / 2 - 32 / 2,
+    y: canvas.height / 2 - 32 / 2
+  },
   frames: { max: spriteCount },
   sprites: {
     up: playerImageUp,
@@ -55,19 +55,49 @@ const player = new Sprite({
   },
 })
 
+const collisionsMap = []
+for (let i = 0; i < collisions.length; i += 26) {
+  collisionsMap.push(collisions.slice(i, i + 26))
+}
+
+const boundaries = []
+collisionsMap.forEach((row, y) => {
+  row.forEach((cell, x) => {
+    if (cell > 0) {
+      boundaries.push(new Boundary({
+        position: {
+          x: x * Boundary.width + initMapPos.x,
+          y: y * Boundary.height + initMapPos.y,
+        }
+      }))
+    }
+  })
+})
+
+
+const movables = [
+  background,
+  foreground,
+  // ...boundaries
+]
+
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 's':
       keys.s.pressed = true
+      lastKey = 's'
       break;
     case 'w':
       keys.w.pressed = true
+      lastKey = 'w'
       break;
     case 'a':
       keys.a.pressed = true
+      lastKey = 'a'
       break;
     case 'd':
       keys.d.pressed = true
+      lastKey = 'd'
       break;
 
     default:
@@ -146,42 +176,102 @@ const keys = {
     pressed: false,
   },
 }
+let lastKey = ''
+
+const isColliding = (object, collider) => {
+  return object.position.x + object.width > collider.position.x &&
+    object.position.x < collider.position.x + collider.width &&
+    object.position.y + object.height > collider.position.y &&
+    object.position.y < collider.position.y + collider.height
+}
+
+const STEP = 1
+const OFFSET = 0
+
+const isMovePossible = (movable) => {
+  for (let i = 0; i < boundaries.length; i++) {
+    const boundary = boundaries[i]
+    if (isColliding(movable, boundary)) {
+      console.log('colliding')
+      // moving = false
+      return false
+    }
+  }
+  return true
+}
+
+const makePlayerMove = (axis, distance, offset) => {
+  const tempPlayer = { ...player, position: { ...player.position, [axis]: player.position[axis] + distance + offset } }
+
+  if (isMovePossible(tempPlayer)) {
+    movables.forEach(movable => {
+      movable.position[axis] += distance
+    })
+    boundaries.forEach(boundary => {
+      boundary.position[axis] += 2 * distance
+    })
+  }
+}
+
+const debugDraw = () => {
+  boundaries.forEach(boundary => {
+    context.fillStyle = 'rgba(255, 0, 0, 0.2)'
+    context.fillRect(boundary.position.x, boundary.position.y, boundary.width, boundary.height)
+  })
+
+  // give the player 1 pixel wide stripes as a measure of distance
+  context.fillStyle = 'rgba(0, 0, 255, 0.2)'
+  context.fillRect(player.position.x, player.position.y, player.width, player.height)
+  context.fillStyle = 'rgba(0, 255, 0, 0.2)'
+  context.fillRect(player.position.x, player.position.y, 1, player.height)
+  context.fillStyle = 'rgba(0, 0, 255, 0.2)'
+  context.fillRect(player.position.x + 1, player.position.y, 1, player.height)
+  context.fillStyle = 'rgba(0, 255, 0, 0.2)'
+  context.fillRect(player.position.x + 2, player.position.y, 1, player.height)
+  context.fillStyle = 'rgba(0, 0, 255, 0.2)'
+  context.fillRect(player.position.x + 3, player.position.y, 1, player.height)
+  context.fillStyle = 'rgba(0, 255, 0, 0.2)'
+  context.fillRect(player.position.x + 4, player.position.y, 1, player.height)
+  context.fillStyle = 'rgba(0, 0, 255, 0.2)'
+  context.fillRect(player.position.x + 5, player.position.y, 1, player.height)
+}
 
 const animate = () => {
   window.requestAnimationFrame(animate)
+  context.fillStyle = "#0099cc" // ocean blue
   context.fillRect(0, 0, canvas.width, canvas.height);
   background.draw()
+  debugDraw()
   player.draw()
+
+
   foreground.draw()
 
   player.moving = false
-  if (keys.w.pressed) {
+
+  if (keys.w.pressed && lastKey === 'w') {
     player.direction = 'up'
-    player.moving = true
     player.image = player.sprites.up
-    background.position.y += 1
-    foreground.position.y += 1
+    player.moving = true
+    makePlayerMove('y', STEP, -OFFSET)
   }
-  if (keys.s.pressed) {
+  if (keys.s.pressed && lastKey === 's') {
     player.direction = 'down'
-    player.moving = true
     player.image = player.sprites.down
-    background.position.y -= 1
-    foreground.position.y -= 1
+    player.moving = true
+    makePlayerMove('y', -STEP, OFFSET)
   }
-  if (keys.a.pressed) {
+  if (keys.a.pressed && lastKey === 'a') {
     player.direction = 'left'
-    player.moving = true
     player.image = player.sprites.left
-    background.position.x += 1
-    foreground.position.x += 1
-  }
-  if (keys.d.pressed) {
-    player.direction = 'right'
     player.moving = true
+    makePlayerMove('x', STEP, -OFFSET)
+  }
+  if (keys.d.pressed && lastKey === 'd') {
+    player.direction = 'right'
     player.image = player.sprites.right
-    background.position.x -= 1
-    foreground.position.x -= 1
+    player.moving = true
+    makePlayerMove('x', -STEP, OFFSET)
   }
 
   if (!player.moving) {
@@ -201,8 +291,14 @@ const animate = () => {
       default:
         break;
     }
+  } else {
+    document.getElementById('player').innerHTML = `x: ${background.position.x}, y: ${background.position.y}`
+
+
+    // document.getElementById('boundary').innerHTML = `x: ${boundaries[closestBoundary.x].position.x}, y: ${boundaries[closestBoundary.y].position.y}`
   }
 
 }
+
 
 animate()
