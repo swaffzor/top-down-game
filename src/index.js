@@ -81,6 +81,12 @@ const movables = [
   // ...boundaries
 ]
 
+const drawables = [
+  background,
+  player,
+  foreground,
+]
+
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 's':
@@ -241,14 +247,16 @@ const debugDraw = () => {
   context.fillRect(player.position.x + 5, player.position.y, 1, player.height)
 }
 
-const animate = () => {
-  window.requestAnimationFrame(animate)
+const draw = () => {
   context.fillStyle = "#0099cc" // ocean blue
   context.fillRect(0, 0, canvas.width, canvas.height);
-  background.draw()
-  debugDraw()
-  player.draw()
-  foreground.draw()
+  drawables.forEach(drawable => drawable.draw())
+  // debugDraw()
+}
+
+const animate = () => {
+  window.requestAnimationFrame(animate)
+  draw()
 
   if (keys.w.pressed && lastKey === 'w') {
     player.direction = 'up'
