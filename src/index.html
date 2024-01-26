@@ -10,6 +10,17 @@
       Your browser does not support the HTML canvas tag.
     </canvas>
 
+    <div class="score container mr-16 mt-16">
+      <div>
+        background:
+        <span class="score" id="player">0,0</span>
+      </div>
+      <div>
+        boundary:
+        <span class="score" id="boundary">0,0</span>
+      </div>
+    </div>
+
     <div class="dpad" id="dpad">
       <button class="button ml-50" id="button-up">up</button>
       <div>
@@ -20,6 +31,7 @@
     </div>
 
     <script src="classes.js"></script>
+    <script src="collisions.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

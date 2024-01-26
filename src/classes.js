@@ -36,3 +36,19 @@ class Sprite {
     }
   }
 }
+
+class Boundary {
+  static width = 16
+  static height = 16
+  static isBoundary = true
+  constructor({ position }) {
+    this.position = position
+    this.width = 16
+    this.height = 16
+  }
+
+  draw() {
+    context.fillStyle = 'rgba(255, 0, 0, 0.2)'
+    context.fillRect(this.position.x, this.position.y, this.width, this.height)
+  }
+}

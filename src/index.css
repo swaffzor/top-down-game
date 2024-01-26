@@ -37,3 +37,20 @@
   margin-left: 16px;
   margin-bottom: 16px;
 }
+
+.mr-16 {
+  margin-right: 16px;
+}
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+.score {
+  text-align: end;
+  &.container {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
