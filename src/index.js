@@ -109,15 +109,19 @@ window.addEventListener('keyup', (event) => {
   switch (event.key) {
     case 's':
       keys.s.pressed = false
+      player.moving = false
       break;
     case 'w':
       keys.w.pressed = false
+      player.moving = false
       break;
     case 'a':
       keys.a.pressed = false
+      player.moving = false
       break;
     case 'd':
       keys.d.pressed = false
+      player.moving = false
       break;
 
     default:
@@ -186,14 +190,14 @@ const isColliding = (object, collider) => {
 }
 
 const STEP = 1
-const OFFSET = 0
+const OFFSET = 3
 
 const isMovePossible = (movable) => {
   for (let i = 0; i < boundaries.length; i++) {
     const boundary = boundaries[i]
     if (isColliding(movable, boundary)) {
       console.log('colliding')
-      // moving = false
+      moving = false
       return false
     }
   }
@@ -204,6 +208,7 @@ const makePlayerMove = (axis, distance, offset) => {
   const tempPlayer = { ...player, position: { ...player.position, [axis]: player.position[axis] + distance + offset } }
 
   if (isMovePossible(tempPlayer)) {
+    player.moving = true
     movables.forEach(movable => {
       movable.position[axis] += distance
     })
@@ -243,34 +248,26 @@ const animate = () => {
   background.draw()
   debugDraw()
   player.draw()
-
-
   foreground.draw()
-
-  player.moving = false
 
   if (keys.w.pressed && lastKey === 'w') {
     player.direction = 'up'
     player.image = player.sprites.up
-    player.moving = true
     makePlayerMove('y', STEP, -OFFSET)
   }
   if (keys.s.pressed && lastKey === 's') {
     player.direction = 'down'
     player.image = player.sprites.down
-    player.moving = true
     makePlayerMove('y', -STEP, OFFSET)
   }
   if (keys.a.pressed && lastKey === 'a') {
     player.direction = 'left'
     player.image = player.sprites.left
-    player.moving = true
     makePlayerMove('x', STEP, -OFFSET)
   }
   if (keys.d.pressed && lastKey === 'd') {
     player.direction = 'right'
     player.image = player.sprites.right
-    player.moving = true
     makePlayerMove('x', -STEP, OFFSET)
   }
 
@@ -293,12 +290,24 @@ const animate = () => {
     }
   } else {
     document.getElementById('player').innerHTML = `x: ${background.position.x}, y: ${background.position.y}`
-
-
-    // document.getElementById('boundary').innerHTML = `x: ${boundaries[closestBoundary.x].position.x}, y: ${boundaries[closestBoundary.y].position.y}`
   }
 
 }
 
 
 animate()
+
+canvas.addEventListener('click', function (event) {
+  var rect = canvas.getBoundingClientRect();
+  var x = event.clientX - rect.left;
+  var y = event.clientY - rect.top;
+  console.log(`Click. X: ${x} Y: ${y}`);
+  // Loop through boundaries and check if click matches a boundary
+  boundaries.forEach((boundary) => {
+    if (x >= boundary.position.x && x <= boundary.position.x + boundary.width &&
+      y >= boundary.position.y && y <= boundary.position.y + boundary.height) {
+      // Log the boundary's details
+      console.log(`Boundary clicked. X: ${boundary.position.x} Y: ${boundary.position.y}`);
+    }
+  });
+}, false);
