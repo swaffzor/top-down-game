@@ -4,9 +4,9 @@ const context = canvas.getContext("2d");
 canvas.width = 900 //* 16
 canvas.height = 506 //* 9
 
-if (window.innerHeight < window.innerWidth) {
-  document.getElementById('dpad').style.display = 'none'
-}
+// if (window.innerHeight < window.innerWidth) {
+//   document.getElementById('dpad').style.display = 'none'
+// }
 
 const initMapPos = { x: canvas.width / 4, y: canvas.height / 4 }
 const map = new Image();
@@ -139,15 +139,19 @@ const move = (direction) => {
   switch (direction) {
     case "up":
       keys.w.pressed = true
+      lastKey = 'w'
       break;
     case "down":
       keys.s.pressed = true
+      lastKey = 's'
       break;
     case "left":
       keys.a.pressed = true
+      lastKey = 'a'
       break;
     case "right":
       keys.d.pressed = true
+      lastKey = 'd'
       break;
   }
 }
