@@ -65,6 +65,14 @@ const ball = new Boundary({
   fillStyle: 'rgba(255, 255, 255, 1)'
 })
 
+const powerBar = new Boundary({
+  position: { x: player.position.x + 16, y: 260 },
+  width: 10,
+  height: 10,
+  shape: 'rect',
+  fillStyle: 'rgba(255, 0, 255, 1)'
+})
+
 const collisionsMap = []
 for (let i = 0; i < collisions.length; i += 26) {
   collisionsMap.push(collisions.slice(i, i + 26))
@@ -95,8 +103,12 @@ const drawables = [
   background,
   player,
   foreground,
-  ball
+  ball,
 ]
+
+let state = {
+  animationMode: 'move'
+}
 
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
@@ -126,7 +138,14 @@ window.addEventListener('keydown', (event) => {
       break
     case 'Enter':
       keys.enter.pressed = true
-      if (isColliding(player, ball)) {
+      if (isColliding(player, ball) && state.animationMode === 'move') {
+        state.animationMode = 'powerBar'
+        powerBar.fillStyle = 'rgba(255, 0, 255, 1)'
+        window.requestAnimationFrame(animatePowerBar)
+      } else if (state.animationMode === 'powerBar') {
+        powerBar.fillStyle = 'rgba(255, 0, 255, 0)'
+        state.animationMode = 'move'
+        ball.velocity.x = powerBar.width / 100
         window.requestAnimationFrame(animateBall)
       }
       break
@@ -245,6 +264,7 @@ const isColliding = (object, collider) => {
 }
 
 const isMovePossible = (movable) => {
+  if (state.animationMode !== 'move') return false
   for (let i = 0; i < boundaries.length; i++) {
     const boundary = boundaries[i]
     if (isColliding(movable, boundary)) {
@@ -257,7 +277,7 @@ const isMovePossible = (movable) => {
 }
 
 const makePlayerMove = (direction) => {
-  player.direction = direction
+  if (state.animationMode !== "powerBar") player.direction = direction
   player.image = player.sprites[direction]
 
   const axis = direction === 'up' || direction === 'down' ? 'y' : 'x'
@@ -361,9 +381,81 @@ const animate = () => {
 
 animate()
 
+let powerBarCounter = 0
+let barDirection = 'grow'
+const animatePowerBar = () => {
+  // position the power bar
+  if (player.direction === 'up') {
+    powerBar.width = 10
+    powerBar.position.x = ball.position.x - powerBar.width / 2
+    powerBar.position.y = ball.position.y - powerBar.height
+  }
+  if (player.direction === 'down') {
+    powerBar.width = 10
+    powerBar.position.x = ball.position.x - powerBar.width / 2
+    powerBar.position.y = ball.position.y - ball.height / 2
+  }
+  if (player.direction === 'left') {
+    powerBar.height = 10
+    powerBar.position.x = ball.position.x - powerBar.width
+    powerBar.position.y = ball.position.y - powerBar.height / 2
+  }
+  if (player.direction === 'right') {
+    powerBar.height = 10
+    powerBar.position.x = ball.position.x
+    powerBar.position.y = ball.position.y - powerBar.height / 2
+  }
+
+  powerBar.draw()
+  ball.draw()
+
+  // animate the power bar
+  if (barDirection === 'grow') {
+    if (player.direction === 'right') {
+      if (powerBar.width < 100) powerBar.width += 1
+      else barDirection = 'shrink'
+    }
+    if (player.direction === 'down') {
+      if (powerBar.height < 100) powerBar.height += 1
+      else barDirection = 'shrink'
+    }
+    if (player.direction === 'left') {
+      if (powerBar.width < 100) powerBar.width += 1
+      else barDirection = 'shrink'
+    }
+    if (player.direction === 'up') {
+      if (powerBar.height < 100) powerBar.height += 1
+      else barDirection = 'shrink'
+    }
+  }
+  else if (barDirection === 'shrink') {
+    if (player.direction === 'right') {
+      if (powerBar.width > 0) powerBar.width -= 1
+      else barDirection = 'grow'
+    }
+    if (player.direction === 'down') {
+      if (powerBar.height > 0) powerBar.height -= 1
+      else barDirection = 'grow'
+    }
+    if (player.direction === 'left') {
+      if (powerBar.width > 0) powerBar.width -= 1
+      else barDirection = 'grow'
+    }
+    if (player.direction === 'up') {
+      if (powerBar.height > 0) powerBar.height -= 1
+      else barDirection = 'grow'
+    }
+  }
+  else if (powerBar.width === 100) barDirection = 'shrink'
+  else if (powerBar.width === 0) barDirection = 'grow'
+
+  if (state.animationMode === 'powerBar') window.requestAnimationFrame(animatePowerBar)
+}
+
 let counter = 0
 const animateBall = () => {
   ball.draw()
+
   if (player.direction === 'up') {
     ball.position.y -= ball.velocity.y
   }
