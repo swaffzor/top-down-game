@@ -75,6 +75,7 @@ class Boundary {
     this.fillStyle = fillStyle
     this.shape = shape
     this.velocity = { x: 1, y: 1, z: 0 }
+    this.direction = ''
   }
 
   draw() {

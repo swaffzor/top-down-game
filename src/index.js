@@ -140,12 +140,12 @@ window.addEventListener('keydown', (event) => {
       keys.enter.pressed = true
       if (isColliding(player, ball) && state.animationMode === 'move') {
         state.animationMode = 'powerBar'
-        powerBar.fillStyle = 'rgba(255, 0, 255, 1)'
+        ball.direction = player.direction
         window.requestAnimationFrame(animatePowerBar)
       } else if (state.animationMode === 'powerBar') {
-        powerBar.fillStyle = 'rgba(255, 0, 255, 0)'
         state.animationMode = 'move'
         ball.velocity.x = powerBar.width / 100
+        ball.velocity.y = powerBar.height / 100
         window.requestAnimationFrame(animateBall)
       }
       break
@@ -333,6 +333,7 @@ const draw = () => {
 const STEP = 1
 const RUN = 2
 const OFFSET = 3
+const BAR_VELOCITY = 3
 
 const animate = () => {
   draw()
@@ -372,16 +373,15 @@ const animate = () => {
         break;
     }
   } else {
-    document.getElementById('player').innerHTML = `x: ${player.position.x}, y: ${player.position.y}, z: ${player.position.z}`
-    document.getElementById('background').innerHTML = `x: ${background.position.x}, y: ${background.position.y}`
   }
+  document.getElementById('player').innerHTML = `player: x: ${background.position.x}, y: ${background.position.y}`
+  document.getElementById('background').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)}`
 
   window.requestAnimationFrame(animate)
 }
 
 animate()
 
-let powerBarCounter = 0
 let barDirection = 'grow'
 const animatePowerBar = () => {
   // position the power bar
@@ -412,37 +412,37 @@ const animatePowerBar = () => {
   // animate the power bar
   if (barDirection === 'grow') {
     if (player.direction === 'right') {
-      if (powerBar.width < 100) powerBar.width += 1
+      if (powerBar.width < 100) powerBar.width += BAR_VELOCITY
       else barDirection = 'shrink'
     }
     if (player.direction === 'down') {
-      if (powerBar.height < 100) powerBar.height += 1
+      if (powerBar.height < 100) powerBar.height += BAR_VELOCITY
       else barDirection = 'shrink'
     }
     if (player.direction === 'left') {
-      if (powerBar.width < 100) powerBar.width += 1
+      if (powerBar.width < 100) powerBar.width += BAR_VELOCITY
       else barDirection = 'shrink'
     }
     if (player.direction === 'up') {
-      if (powerBar.height < 100) powerBar.height += 1
+      if (powerBar.height < 100) powerBar.height += BAR_VELOCITY
       else barDirection = 'shrink'
     }
   }
   else if (barDirection === 'shrink') {
     if (player.direction === 'right') {
-      if (powerBar.width > 0) powerBar.width -= 1
+      if (powerBar.width > 10) powerBar.width -= BAR_VELOCITY
       else barDirection = 'grow'
     }
     if (player.direction === 'down') {
-      if (powerBar.height > 0) powerBar.height -= 1
+      if (powerBar.height > 10) powerBar.height -= BAR_VELOCITY
       else barDirection = 'grow'
     }
     if (player.direction === 'left') {
-      if (powerBar.width > 0) powerBar.width -= 1
+      if (powerBar.width > 10) powerBar.width -= BAR_VELOCITY
       else barDirection = 'grow'
     }
     if (player.direction === 'up') {
-      if (powerBar.height > 0) powerBar.height -= 1
+      if (powerBar.height > 10) powerBar.height -= BAR_VELOCITY
       else barDirection = 'grow'
     }
   }
@@ -456,18 +456,48 @@ let counter = 0
 const animateBall = () => {
   ball.draw()
 
-  if (player.direction === 'up') {
+  if (ball.direction === 'up') {
     ball.position.y -= ball.velocity.y
   }
-  if (player.direction === 'down') {
+  if (ball.direction === 'down') {
     ball.position.y += ball.velocity.y
   }
-  if (player.direction === 'left') {
+  if (ball.direction === 'left') {
     ball.position.x -= ball.velocity.x
   }
-  if (player.direction === 'right') {
+  if (ball.direction === 'right') {
     ball.position.x += ball.velocity.x
   }
+
+  if (ball.direction === 'up' || ball.direction === 'down') {
+    if (counter === 20) {
+      ball.width += 1
+    }
+    if (counter === 40) {
+      ball.width += 1
+    }
+    if (counter === 60) {
+      ball.width -= 1
+    }
+    if (counter === 80) {
+      ball.width -= 1
+    }
+  }
+  if (ball.direction === 'left' || ball.direction === 'right') {
+    if (counter < 20) {
+      ball.position.y -= 2 * Math.sin(Math.PI / 4)
+    } else if (counter < 40) {
+      ball.position.y -= Math.sin(.747)
+    } else if (counter < 50) {
+      // no op, straight line
+    } else if (counter < 100) {
+      ball.position.y -= Math.sin(-.747)
+    }
+  }
+
+  // idea: hit ball through portals, can use:
+  // ball.position.y = counter < 50 ? Math.pow(ball.position.x, 2) / 1000 : Math.pow(ball.position.x, 2) / 1000 + 100
+
   if (counter < 100) {
     counter++
     window.requestAnimationFrame(animateBall)
