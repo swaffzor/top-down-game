@@ -235,9 +235,9 @@ const isMovePossible = (movable) => {
   return true
 }
 
-const makePlayerMove = (axis, distance, offset) => {
-  const movingDistance = player.running ? distance * RUN : distance
-  const movingOffset = player.running ? offset * RUN : offset
+const makePlayerMove = (axis, distance) => {
+  const movingDistance = player.running ? distance * RUN : distance * STEP
+  const movingOffset = -1 * distance * (player.running ? OFFSET * RUN : OFFSET)
   const tempPlayer = { ...player, position: { ...player.position, [axis]: player.position[axis] + movingDistance + movingOffset } }
 
   if (isMovePossible(tempPlayer)) {
@@ -291,22 +291,22 @@ const animate = () => {
   if (keys.w.pressed && lastKey === 'w') {
     player.direction = 'up'
     player.image = player.sprites.up
-    makePlayerMove('y', STEP, -OFFSET)
+    makePlayerMove('y', 1)
   }
   if (keys.s.pressed && lastKey === 's') {
     player.direction = 'down'
     player.image = player.sprites.down
-    makePlayerMove('y', -STEP, OFFSET)
+    makePlayerMove('y', -1)
   }
   if (keys.a.pressed && lastKey === 'a') {
     player.direction = 'left'
     player.image = player.sprites.left
-    makePlayerMove('x', STEP, -OFFSET)
+    makePlayerMove('x', 1)
   }
   if (keys.d.pressed && lastKey === 'd') {
     player.direction = 'right'
     player.image = player.sprites.right
-    makePlayerMove('x', -STEP, OFFSET)
+    makePlayerMove('x', -1)
   }
 
   if (!player.moving && !player.jumping) {
