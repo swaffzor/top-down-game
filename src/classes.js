@@ -1,3 +1,5 @@
+const GRAVITY = 0.5
+
 class Sprite {
   constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction }) {
     this.image = image
@@ -28,6 +30,18 @@ class Sprite {
     )
 
     // if (!this.moving) return
+    if (this.jumping) {
+      this.position.y += this.velocity.y
+      this.velocity.y += GRAVITY
+      // if (this.position.y >= canvas.height - this.height) {
+      //   this.position.y = canvas.height - this.height
+      //   this.velocity.y = 0
+      //   this.jumping = false
+      // } else if (this.position.y <= 0) {
+      //   this.position.y = 0
+      //   this.velocity.y = 0
+      // }
+    }
 
     if (this.frames.max > 1) this.frames.elapsed++
     if (this.frames.elapsed % 10 === 0) {

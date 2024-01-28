@@ -4,9 +4,9 @@ const context = canvas.getContext("2d");
 canvas.width = 900 //* 16
 canvas.height = 506 //* 9
 
-// if (window.innerHeight < window.innerWidth) {
-//   document.getElementById('dpad').style.display = 'none'
-// }
+if (window.innerHeight < window.innerWidth) {
+  document.getElementById('dpad').style.display = 'none'
+}
 
 const initMapPos = { x: canvas.width / 4, y: canvas.height / 4 }
 const map = new Image();
@@ -42,6 +42,7 @@ const player = new Sprite({
     x: canvas.width / 2 - 32 / 2,
     y: canvas.height / 2 - 32 / 2
   },
+  velocity: { x: 0, y: 0 },
   frames: { max: spriteCount },
   sprites: {
     up: playerImageUp,
@@ -63,7 +64,7 @@ for (let i = 0; i < collisions.length; i += 26) {
 const boundaries = []
 collisionsMap.forEach((row, y) => {
   row.forEach((cell, x) => {
-    if (cell > 0) {
+    if (cell === 152) {
       boundaries.push(new Boundary({
         position: {
           x: x * Boundary.width + initMapPos.x,
@@ -105,6 +106,11 @@ window.addEventListener('keydown', (event) => {
       keys.d.pressed = true
       lastKey = 'd'
       break;
+    case 'Shift':
+      keys.shift.pressed = true
+      lastKey = 'shift'
+      player.jumping = true
+      break;
 
     default:
       break;
@@ -127,6 +133,10 @@ window.addEventListener('keyup', (event) => {
       break;
     case 'd':
       keys.d.pressed = false
+      player.moving = false
+      break;
+    case 'Shift':
+      keys.shift.pressed = false
       player.moving = false
       break;
 
@@ -187,6 +197,9 @@ const keys = {
     pressed: false,
   },
   d: {
+    pressed: false,
+  },
+  shift: {
     pressed: false,
   },
 }
@@ -259,7 +272,6 @@ const draw = () => {
 }
 
 const animate = () => {
-  window.requestAnimationFrame(animate)
   draw()
 
   if (keys.w.pressed && lastKey === 'w') {
@@ -304,6 +316,7 @@ const animate = () => {
     document.getElementById('player').innerHTML = `x: ${background.position.x}, y: ${background.position.y}`
   }
 
+  window.requestAnimationFrame(animate)
 }
 
 
