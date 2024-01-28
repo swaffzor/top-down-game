@@ -235,9 +235,15 @@ const isMovePossible = (movable) => {
   return true
 }
 
-const makePlayerMove = (axis, distance) => {
-  const movingDistance = player.running ? distance * RUN : distance * STEP
-  const movingOffset = -1 * distance * (player.running ? OFFSET * RUN : OFFSET)
+const makePlayerMove = (direction) => {
+  player.direction = direction
+  player.image = player.sprites[direction]
+
+  const axis = direction === 'up' || direction === 'down' ? 'y' : 'x'
+  const polarity = direction === 'up' || direction === 'left' ? 1 : -1
+
+  const movingDistance = polarity * (player.running ? RUN : STEP)
+  const movingOffset = -1 * polarity * (player.running ? OFFSET * RUN : OFFSET)
   const tempPlayer = { ...player, position: { ...player.position, [axis]: player.position[axis] + movingDistance + movingOffset } }
 
   if (isMovePossible(tempPlayer)) {
@@ -278,35 +284,28 @@ const draw = () => {
   context.fillStyle = "#0099cc" // ocean blue
   context.fillRect(0, 0, canvas.width, canvas.height);
   drawables.forEach(drawable => drawable.draw())
+
   // debugDraw()
 }
 
 const STEP = 1
-const RUN = 2.25
+const RUN = 2
 const OFFSET = 3
 
 const animate = () => {
   draw()
 
   if (keys.w.pressed && lastKey === 'w') {
-    player.direction = 'up'
-    player.image = player.sprites.up
-    makePlayerMove('y', 1)
+    makePlayerMove('up')
   }
   if (keys.s.pressed && lastKey === 's') {
-    player.direction = 'down'
-    player.image = player.sprites.down
-    makePlayerMove('y', -1)
+    makePlayerMove('down')
   }
   if (keys.a.pressed && lastKey === 'a') {
-    player.direction = 'left'
-    player.image = player.sprites.left
-    makePlayerMove('x', 1)
+    makePlayerMove('left')
   }
   if (keys.d.pressed && lastKey === 'd') {
-    player.direction = 'right'
-    player.image = player.sprites.right
-    makePlayerMove('x', -1)
+    makePlayerMove('right')
   }
 
   if (!player.moving && !player.jumping) {
@@ -333,7 +332,6 @@ const animate = () => {
 
   window.requestAnimationFrame(animate)
 }
-
 
 animate()
 
