@@ -57,6 +57,14 @@ const player = new Sprite({
   },
 })
 
+const ball = new Boundary({
+  position: { x: 500, y: 250 },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  fillStyle: 'rgba(255, 255, 255, 1)'
+})
+
 const collisionsMap = []
 for (let i = 0; i < collisions.length; i += 26) {
   collisionsMap.push(collisions.slice(i, i + 26))
@@ -87,6 +95,7 @@ const drawables = [
   background,
   player,
   foreground,
+  ball
 ]
 
 window.addEventListener('keydown', (event) => {
@@ -114,6 +123,12 @@ window.addEventListener('keydown', (event) => {
     case 'k':
       keys.k.pressed = true
       player.running = true
+      break
+    case 'Enter':
+      keys.enter.pressed = true
+      if (isColliding(player, ball)) {
+        window.requestAnimationFrame(animateBall)
+      }
       break
 
     default:
@@ -146,6 +161,9 @@ window.addEventListener('keyup', (event) => {
     case 'k':
       keys.k.pressed = false
       player.running = false
+      break
+    case 'Enter':
+      keys.enter.pressed = false
       break
 
     default:
@@ -213,6 +231,9 @@ const keys = {
   k: {
     pressed: false,
   },
+  enter: {
+    pressed: false,
+  }
 }
 let lastKey = ''
 
@@ -254,6 +275,7 @@ const makePlayerMove = (direction) => {
     boundaries.forEach(boundary => {
       boundary.position[axis] += 2 * movingDistance
     })
+    ball.position[axis] += 2 * movingDistance
   }
 }
 
@@ -308,6 +330,10 @@ const animate = () => {
     makePlayerMove('right')
   }
 
+  // if (keys.enter.pressed) {
+  //   window.requestAnimationFrame(animateBall)
+  // }
+
   if (!player.moving && !player.jumping) {
     switch (player.direction) {
       case "up":
@@ -334,6 +360,29 @@ const animate = () => {
 }
 
 animate()
+
+let counter = 0
+const animateBall = () => {
+  ball.draw()
+  if (player.direction === 'up') {
+    ball.position.y -= ball.velocity.y
+  }
+  if (player.direction === 'down') {
+    ball.position.y += ball.velocity.y
+  }
+  if (player.direction === 'left') {
+    ball.position.x -= ball.velocity.x
+  }
+  if (player.direction === 'right') {
+    ball.position.x += ball.velocity.x
+  }
+  if (counter < 100) {
+    counter++
+    window.requestAnimationFrame(animateBall)
+  } else {
+    counter = 0
+  }
+}
 
 canvas.addEventListener('click', function (event) {
   var rect = canvas.getBoundingClientRect();
