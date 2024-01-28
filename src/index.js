@@ -40,7 +40,8 @@ const player = new Sprite({
   image: playerIdleDown,
   position: {
     x: canvas.width / 2 - 32 / 2,
-    y: canvas.height / 2 - 32 / 2
+    y: canvas.height / 2 - 32 / 2,
+    z: 0,
   },
   velocity: { x: 0, y: 0 },
   frames: { max: spriteCount },
@@ -106,11 +107,14 @@ window.addEventListener('keydown', (event) => {
       keys.d.pressed = true
       lastKey = 'd'
       break;
-    case 'Shift':
-      keys.shift.pressed = true
-      lastKey = 'shift'
-      player.jumping = true
+    case 'j':
+      keys.j.pressed = true
+      player.jumping = 1
       break;
+    case 'k':
+      keys.k.pressed = true
+      player.running = true
+      break
 
     default:
       break;
@@ -135,10 +139,14 @@ window.addEventListener('keyup', (event) => {
       keys.d.pressed = false
       player.moving = false
       break;
-    case 'Shift':
-      keys.shift.pressed = false
+    case 'j':
+      keys.j.pressed = false
       player.moving = false
       break;
+    case 'k':
+      keys.k.pressed = false
+      player.running = false
+      break
 
     default:
       break;
@@ -199,7 +207,10 @@ const keys = {
   d: {
     pressed: false,
   },
-  shift: {
+  j: {
+    pressed: false,
+  },
+  k: {
     pressed: false,
   },
 }
@@ -211,9 +222,6 @@ const isColliding = (object, collider) => {
     object.position.y + object.height > collider.position.y &&
     object.position.y < collider.position.y + collider.height
 }
-
-const STEP = 1
-const OFFSET = 3
 
 const isMovePossible = (movable) => {
   for (let i = 0; i < boundaries.length; i++) {
@@ -228,15 +236,17 @@ const isMovePossible = (movable) => {
 }
 
 const makePlayerMove = (axis, distance, offset) => {
-  const tempPlayer = { ...player, position: { ...player.position, [axis]: player.position[axis] + distance + offset } }
+  const movingDistance = player.running ? distance * RUN : distance
+  const movingOffset = player.running ? offset * RUN : offset
+  const tempPlayer = { ...player, position: { ...player.position, [axis]: player.position[axis] + movingDistance + movingOffset } }
 
   if (isMovePossible(tempPlayer)) {
     player.moving = true
     movables.forEach(movable => {
-      movable.position[axis] += distance
+      movable.position[axis] += movingDistance
     })
     boundaries.forEach(boundary => {
-      boundary.position[axis] += 2 * distance
+      boundary.position[axis] += 2 * movingDistance
     })
   }
 }
@@ -271,6 +281,10 @@ const draw = () => {
   // debugDraw()
 }
 
+const STEP = 1
+const RUN = 2.25
+const OFFSET = 3
+
 const animate = () => {
   draw()
 
@@ -295,7 +309,7 @@ const animate = () => {
     makePlayerMove('x', -STEP, OFFSET)
   }
 
-  if (!player.moving) {
+  if (!player.moving && !player.jumping) {
     switch (player.direction) {
       case "up":
         player.image = player.sprites.idleUp
@@ -313,7 +327,8 @@ const animate = () => {
         break;
     }
   } else {
-    document.getElementById('player').innerHTML = `x: ${background.position.x}, y: ${background.position.y}`
+    document.getElementById('player').innerHTML = `x: ${player.position.x}, y: ${player.position.y}, z: ${player.position.z}`
+    document.getElementById('background').innerHTML = `x: ${background.position.x}, y: ${background.position.y}`
   }
 
   window.requestAnimationFrame(animate)
@@ -328,11 +343,11 @@ canvas.addEventListener('click', function (event) {
   var y = event.clientY - rect.top;
   console.log(`Click. X: ${x} Y: ${y}`);
   // Loop through boundaries and check if click matches a boundary
-  boundaries.forEach((boundary) => {
-    if (x >= boundary.position.x && x <= boundary.position.x + boundary.width &&
-      y >= boundary.position.y && y <= boundary.position.y + boundary.height) {
-      // Log the boundary's details
-      console.log(`Boundary clicked. X: ${boundary.position.x} Y: ${boundary.position.y}`);
-    }
-  });
+  // boundaries.forEach((boundary) => {
+  //   if (x >= boundary.position.x && x <= boundary.position.x + boundary.width &&
+  //     y >= boundary.position.y && y <= boundary.position.y + boundary.height) {
+  //     // Log the boundary's details
+  //     console.log(`Boundary clicked. X: ${boundary.position.x} Y: ${boundary.position.y}`);
+  //   }
+  // });
 }, false);

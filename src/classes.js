@@ -1,10 +1,10 @@
-const GRAVITY = 0.5
+const GRAVITY = 2
 
 class Sprite {
   constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction }) {
     this.image = image
-    this.position = position
-    this.frames = { ...frames, val: 0, elapsed: 0 }
+    this.position = position,
+      this.frames = { ...frames, val: 0, elapsed: 0 }
     this.velocity = velocity
     this.sprites = sprites
     this.direction = direction
@@ -14,6 +14,8 @@ class Sprite {
       this.height = this.image.height
     }
     this.moving = false
+    this.running = false
+    this.jumping = 0
   }
 
   draw() {
@@ -29,22 +31,27 @@ class Sprite {
       this.image.height,
     )
 
-    // if (!this.moving) return
-    if (this.jumping) {
-      this.position.y += this.velocity.y
-      this.velocity.y += GRAVITY
-      // if (this.position.y >= canvas.height - this.height) {
-      //   this.position.y = canvas.height - this.height
-      //   this.velocity.y = 0
-      //   this.jumping = false
-      // } else if (this.position.y <= 0) {
-      //   this.position.y = 0
-      //   this.velocity.y = 0
-      // }
+    if (this.jumping > 0) {
+      this.velocity.y = 3
+      if (this.position.z < 15) {
+        this.position.y -= this.velocity.y
+        this.position.z += this.velocity.y
+      } else {
+        this.jumping = -1
+      }
+    } else if (this.jumping < 0) { // falling
+      if (this.position.z > 0) {
+        this.position.y += this.velocity.y * 1.5
+        this.position.z -= this.velocity.y * 1.5
+      } else {
+        this.jumping = 0
+        this.velocity.y = 0
+      }
     }
 
+    const frameFactor = this.running ? 5 : 10
     if (this.frames.max > 1) this.frames.elapsed++
-    if (this.frames.elapsed % 10 === 0) {
+    if (this.frames.elapsed % frameFactor === 0) {
       if (this.frames.val < this.frames.max - 1) this.frames.val++
       else this.frames.val = 0
     }
