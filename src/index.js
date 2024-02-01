@@ -73,6 +73,22 @@ const powerBar = new Boundary({
   fillStyle: 'rgba(255, 0, 255, 1)'
 })
 
+const portal3 = new Image();
+portal3.src = './sprites/portal3.png'
+const portalA = new Sprite({
+  image: portal3,
+  position: { x: 580, y: 220 },
+  frames: { max: 7 },
+})
+
+const portal4 = new Image();
+portal4.src = './sprites/portal3.png'
+const portalB = new Sprite({
+  image: portal4,
+  position: { x: 415, y: 350 },
+  frames: { max: 7 },
+})
+
 const collisionsMap = []
 for (let i = 0; i < collisions.length; i += 26) {
   collisionsMap.push(collisions.slice(i, i + 26))
@@ -93,10 +109,13 @@ collisionsMap.forEach((row, y) => {
 })
 
 
+const grounds = [background, foreground]
+
 const movables = [
-  background,
-  foreground,
-  // ...boundaries
+  ball,
+  portalA,
+  portalB,
+  ...boundaries
 ]
 
 const drawables = [
@@ -104,6 +123,8 @@ const drawables = [
   player,
   foreground,
   ball,
+  portalA,
+  portalB,
 ]
 
 let state = {
@@ -289,13 +310,13 @@ const makePlayerMove = (direction) => {
 
   if (isMovePossible(tempPlayer)) {
     player.moving = true
-    movables.forEach(movable => {
+    grounds.forEach(movable => {
       movable.position[axis] += movingDistance
     })
-    boundaries.forEach(boundary => {
+    movables.forEach(boundary => {
       boundary.position[axis] += 2 * movingDistance
     })
-    ball.position[axis] += 2 * movingDistance
+    // ball.position[axis] += 2 * movingDistance
   }
 }
 
@@ -453,6 +474,7 @@ const animatePowerBar = () => {
 }
 
 let counter = 0
+let isInPortal = false
 const animateBall = () => {
   ball.draw()
 
@@ -469,6 +491,17 @@ const animateBall = () => {
     ball.position.x += ball.velocity.x
   }
 
+  if (!isInPortal && isColliding(ball, portalA)) {
+    isInPortal = true
+    ball.position.x = portalB.position.x + portalB.width / 2
+    ball.position.y = portalB.position.y + portalB.height / 2
+  }
+  if (!isInPortal && isColliding(ball, portalB)) {
+    isInPortal = true
+    ball.position.x = portalA.position.x + ball.velocity.x
+    ball.position.y = portalA.position.y + ball.velocity.y
+  }
+
   if (ball.direction === 'up' || ball.direction === 'down') {
     if (counter === 20) {
       ball.width += 1
@@ -483,15 +516,17 @@ const animateBall = () => {
       ball.width -= 1
     }
   }
+
   if (ball.direction === 'left' || ball.direction === 'right') {
     if (counter < 20) {
       ball.position.y -= 2 * Math.sin(Math.PI / 4)
-    } else if (counter < 40) {
+    } else if (counter < 39) {
       ball.position.y -= Math.sin(.747)
-    } else if (counter < 50) {
-      // no op, straight line
+    } else if (counter < 75) {
+      ball.position.y -= Math.sin(-.89) * 3 / 2
     } else if (counter < 100) {
-      ball.position.y -= Math.sin(-.747)
+      // no op, straight line, roll on ground
+
     }
   }
 
@@ -503,6 +538,7 @@ const animateBall = () => {
     window.requestAnimationFrame(animateBall)
   } else {
     counter = 0
+    isInPortal = false
   }
 }
 
