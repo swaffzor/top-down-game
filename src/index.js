@@ -35,10 +35,11 @@ playerIdleRight.src = './sprites/alex/idle_right.png'
 const player = new Sprite({
   image: './sprites/alex/idle_down.png',
   position: {
-    x: canvas.width / 2 - 32 / 2,
-    y: canvas.height / 2 - 32 / 2,
+    x: 485,//canvas.width / 2 - 32 / 2,
+    y: 232,//canvas.height / 2 - 32 / 2,
     z: 0,
   },
+  direction: 'right',
   velocity: { x: 0, y: 0 },
   frames: { max: spriteCount },
   sprites: {
@@ -53,6 +54,11 @@ const player = new Sprite({
   },
 })
 
+const club = {
+  position: { x: player.position.x + 16, y: player.position.y },
+  power: 200
+}
+
 const ball = new Boundary({
   position: { x: 500, y: 250 },
   width: 3,
@@ -63,8 +69,16 @@ const ball = new Boundary({
 
 const hole = new Sprite({
   image: './sprites/hole.png',
-  position: { x: 500, y: 250 },
+  position: { x: 310, y: 225 },
   frames: { max: 1 },
+})
+
+const holeBoundary = new Boundary({
+  position: { x: hole.position.x + 4, y: hole.position.y },
+  width: 8,
+  height: 9,
+  shape: 'rect',
+  fillStyle: 'rgba(255, 0, 0, 0.2)'
 })
 
 const powerBar = new Boundary({
@@ -77,13 +91,13 @@ const powerBar = new Boundary({
 
 const portalA = new Sprite({
   image: './sprites/portal3.png',
-  position: { x: 580, y: 220 },
+  position: { x: 570, y: 220 },
   frames: { max: 7 },
 })
 
 const portalB = new Sprite({
   image: './sprites/portal3.png',
-  position: { x: 415, y: 350 },
+  position: { x: 262, y: 200 },
   frames: { max: 7 },
 })
 
@@ -114,6 +128,7 @@ const movables = [
   portalA,
   portalB,
   hole,
+  holeBoundary,
   ...boundaries
 ]
 
@@ -121,10 +136,11 @@ const drawables = [
   background,
   portalA,
   portalB,
-  ball,
   hole,
+  ball,
   player,
   foreground,
+  holeBoundary,
 ]
 
 let state = {
@@ -159,16 +175,35 @@ window.addEventListener('keydown', (event) => {
       break
     case 'Enter':
       keys.enter.pressed = true
-      if (isColliding(player, ball) && state.animationMode === 'move') {
+      if (isColliding({ ...player, width: player.width + 10, height: player.height + 5 }, ball) && state.animationMode === 'move') {
         state.animationMode = 'powerBar'
         ball.direction = player.direction
         window.requestAnimationFrame(animatePowerBar)
       } else if (state.animationMode === 'powerBar') {
         state.animationMode = 'move'
-        ball.velocity.x = powerBar.width / 100
+        // ball.velocity.x = powerBar.width / 100
+        ball.velocity.x = club.power * .52 / 100 // temporary testing
         ball.velocity.y = powerBar.height / 100
         window.requestAnimationFrame(animateBall)
       }
+      break
+    case 'Escape':
+      if (state.animationMode === 'powerBar') {
+        state.animationMode = 'move'
+      }
+      break
+
+    case 't':
+      keys.t.pressed = true
+      break
+    case 'g':
+      keys.g.pressed = true
+      break
+    case 'f':
+      keys.f.pressed = true
+      break
+    case 'h':
+      keys.h.pressed = true
       break
 
     default:
@@ -204,6 +239,18 @@ window.addEventListener('keyup', (event) => {
       break
     case 'Enter':
       keys.enter.pressed = false
+      break
+    case 't':
+      keys.t.pressed = false
+      break
+    case 'g':
+      keys.g.pressed = false
+      break
+    case 'f':
+      keys.f.pressed = false
+      break
+    case 'h':
+      keys.h.pressed = false
       break
 
     default:
@@ -273,15 +320,31 @@ const keys = {
   },
   enter: {
     pressed: false,
-  }
+  },
+  t: {
+    pressed: false,
+  },
+  g: {
+    pressed: false,
+  },
+  h: {
+    pressed: false,
+  },
+  f: {
+    pressed: false,
+  },
 }
 let lastKey = ''
 
 const isColliding = (object, collider) => {
-  return object.position.x + object.width > collider.position.x &&
-    object.position.x < collider.position.x + collider.width &&
-    object.position.y + object.height > collider.position.y &&
-    object.position.y < collider.position.y + collider.height
+  const objectWidth = object.shape === 'circle' ? object.width * 2 : object.width
+  const objectHeight = object.shape === 'circle' ? object.height * 2 : object.height
+  const colliderWidth = collider.shape === 'circle' ? collider.width * 2 : collider.width
+  const colliderHeight = collider.shape === 'circle' ? collider.height * 2 : collider.height
+  return object.position.x + objectWidth > collider.position.x &&
+    object.position.x < collider.position.x + colliderWidth &&
+    object.position.y + objectHeight > collider.position.y &&
+    object.position.y < collider.position.y + colliderHeight
 }
 
 const isMovePossible = (movable) => {
@@ -372,6 +435,26 @@ const animate = () => {
     makePlayerMove('right')
   }
 
+  if (keys.t.pressed) {
+    ball.position.y -= keys.k.pressed ? 2 : 1
+  }
+  if (keys.g.pressed) {
+    ball.position.y += keys.k.pressed ? 2 : 1
+  }
+  if (keys.f.pressed) {
+    ball.position.x -= keys.k.pressed ? 2 : 1
+  }
+  if (keys.h.pressed) {
+    ball.position.x += keys.k.pressed ? 2 : 1
+  }
+
+  if (isColliding(ball, holeBoundary)) {
+    ball.visible = false
+    console.log('ball in hole')
+  } else {
+    ball.visible = true
+  }
+
   if (!player.moving && !player.jumping) {
     switch (player.direction) {
       case "up":
@@ -391,8 +474,9 @@ const animate = () => {
     }
   } else {
   }
-  document.getElementById('player').innerHTML = `player: x: ${background.position.x}, y: ${background.position.y}`
-  document.getElementById('background').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)}`
+  document.getElementById('stat1').innerHTML = `player: x: ${background.position.x}, y: ${background.position.y}`
+  document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} [w:${ball.width} v:${ball.visible}]`
+  document.getElementById('stat3').innerHTML = `hole: x: ${Math.floor(hole.position.x)}, y: ${Math.floor(hole.position.y)}`
 
   window.requestAnimationFrame(animate)
 }
@@ -429,19 +513,19 @@ const animatePowerBar = () => {
   // animate the power bar
   if (barDirection === 'grow') {
     if (player.direction === 'right') {
-      if (powerBar.width < 100) powerBar.width += BAR_VELOCITY
+      if (powerBar.width < club.power) powerBar.width += BAR_VELOCITY
       else barDirection = 'shrink'
     }
     if (player.direction === 'down') {
-      if (powerBar.height < 100) powerBar.height += BAR_VELOCITY
+      if (powerBar.height < club.power) powerBar.height += BAR_VELOCITY
       else barDirection = 'shrink'
     }
     if (player.direction === 'left') {
-      if (powerBar.width < 100) powerBar.width += BAR_VELOCITY
+      if (powerBar.width < club.power) powerBar.width += BAR_VELOCITY
       else barDirection = 'shrink'
     }
     if (player.direction === 'up') {
-      if (powerBar.height < 100) powerBar.height += BAR_VELOCITY
+      if (powerBar.height < club.power) powerBar.height += BAR_VELOCITY
       else barDirection = 'shrink'
     }
   }
@@ -463,7 +547,7 @@ const animatePowerBar = () => {
       else barDirection = 'grow'
     }
   }
-  else if (powerBar.width === 100) barDirection = 'shrink'
+  else if (powerBar.width === club.power) barDirection = 'shrink'
   else if (powerBar.width === 0) barDirection = 'grow'
 
   if (state.animationMode === 'powerBar') window.requestAnimationFrame(animatePowerBar)

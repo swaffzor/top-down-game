@@ -16,7 +16,7 @@ Me exploring game developing in vanilla HTML, CSS, and JavaScript
 
   - [x] Golf hole asset
   - [x] Golf hole model in code
-  - [] Golf collision with the hole
+  - [x] Golf collision with the hole
 
 - [] Golf ball arc animation
 
@@ -29,5 +29,7 @@ Me exploring game developing in vanilla HTML, CSS, and JavaScript
   - [] Golf club collision with the ball
 
 - [] Golf ball collision with the water
+  - [] Golf ball splash animation
+- [] Golf ball collision with the trees
 - [] Golf ball collision with the sand
 - [] Golf ball collision with the grass
