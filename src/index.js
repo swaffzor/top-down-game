@@ -61,6 +61,12 @@ const ball = new Boundary({
   fillStyle: 'rgba(255, 255, 255, 1)'
 })
 
+const hole = new Sprite({
+  image: './sprites/hole.png',
+  position: { x: 500, y: 250 },
+  frames: { max: 1 },
+})
+
 const powerBar = new Boundary({
   position: { x: player.position.x + 16, y: 260 },
   width: 10,
@@ -107,6 +113,7 @@ const movables = [
   ball,
   portalA,
   portalB,
+  hole,
   ...boundaries
 ]
 
@@ -115,6 +122,7 @@ const drawables = [
   portalA,
   portalB,
   ball,
+  hole,
   player,
   foreground,
 ]
@@ -363,10 +371,6 @@ const animate = () => {
   if (keys.d.pressed && lastKey === 'd') {
     makePlayerMove('right')
   }
-
-  // if (keys.enter.pressed) {
-  //   window.requestAnimationFrame(animateBall)
-  // }
 
   if (!player.moving && !player.jumping) {
     switch (player.direction) {
