@@ -183,8 +183,8 @@ window.addEventListener('keydown', (event) => {
         window.requestAnimationFrame(animatePowerBar)
       } else if (state.animationMode === 'powerBar') {
         state.animationMode = 'move'
-        // ball.velocity.x = powerBar.width / 100
-        ball.velocity.x = club.power * .52 / 100 // temporary testing
+        ball.velocity.x = powerBar.width / 100
+        // ball.velocity.x = club.power * .52 / 100 // temporary testing
         ball.velocity.y = powerBar.height / 100
         window.requestAnimationFrame(animateBall)
       }

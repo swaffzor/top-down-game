@@ -97,10 +97,10 @@ class Boundary {
       context.fill()
     }
     // draw a border around the boundary
-    context.strokeStyle = 'rgba(255, 0, 0, 0.8)'
-    if (this.shape === 'circle') //context.stroke()
-      context.strokeRect(this.position.x, this.position.y, this.width * 2, this.height * 2)
-    else
-      context.strokeRect(this.position.x, this.position.y, this.width, this.height,)
+    // context.strokeStyle = 'rgba(255, 0, 0, 0.8)'
+    // if (this.shape === 'circle') context.stroke()
+    // context.strokeRect(this.position.x, this.position.y, this.width * 2, this.height * 2)
+    // else
+    //   context.strokeRect(this.position.x, this.position.y, this.width, this.height,)
   }
 }
