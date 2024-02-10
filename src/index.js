@@ -9,12 +9,8 @@ if (window.innerHeight < window.innerWidth) {
 }
 
 const initMapPos = { x: canvas.width / 4, y: canvas.height / 4 }
-const map = new Image();
-map.src = './sprites/test-map.png'
-const background = new Sprite({ image: map, position: initMapPos })
-const foreMap = new Image();
-foreMap.src = './sprites/test-map-foreground.png'
-const foreground = new Sprite({ image: foreMap, position: initMapPos })
+const background = new Sprite({ image: './sprites/test-map.png', position: initMapPos })
+const foreground = new Sprite({ image: './sprites/test-map-foreground.png', position: initMapPos })
 
 const spriteCount = 6
 const spriteWidth = 16
@@ -37,7 +33,7 @@ const playerIdleRight = new Image();
 playerIdleRight.src = './sprites/alex/idle_right.png'
 
 const player = new Sprite({
-  image: playerIdleDown,
+  image: './sprites/alex/idle_down.png',
   position: {
     x: canvas.width / 2 - 32 / 2,
     y: canvas.height / 2 - 32 / 2,
@@ -73,18 +69,14 @@ const powerBar = new Boundary({
   fillStyle: 'rgba(255, 0, 255, 1)'
 })
 
-const portal3 = new Image();
-portal3.src = './sprites/portal3.png'
 const portalA = new Sprite({
-  image: portal3,
+  image: './sprites/portal3.png',
   position: { x: 580, y: 220 },
   frames: { max: 7 },
 })
 
-const portal4 = new Image();
-portal4.src = './sprites/portal3.png'
 const portalB = new Sprite({
-  image: portal4,
+  image: './sprites/portal3.png',
   position: { x: 415, y: 350 },
   frames: { max: 7 },
 })
@@ -120,11 +112,11 @@ const movables = [
 
 const drawables = [
   background,
-  player,
-  foreground,
-  ball,
   portalA,
   portalB,
+  ball,
+  player,
+  foreground,
 ]
 
 let state = {
@@ -475,6 +467,7 @@ const animatePowerBar = () => {
 
 let counter = 0
 let isInPortal = false
+
 const animateBall = () => {
   ball.draw()
 

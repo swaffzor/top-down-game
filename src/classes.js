@@ -2,7 +2,8 @@ const GRAVITY = 2
 
 class Sprite {
   constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction }) {
-    this.image = image
+    this.image = new Image()
+    this.image.src = image
     this.direction = direction
     this.position = position
     this.velocity = velocity
