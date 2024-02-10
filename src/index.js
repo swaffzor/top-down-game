@@ -73,10 +73,12 @@ const hole = new Sprite({
   frames: { max: 1 },
 })
 
+const holeWidth = 8
+const holeHeight = 6
 const holeBoundary = new Boundary({
-  position: { x: hole.position.x + 4, y: hole.position.y },
-  width: 8,
-  height: 9,
+  position: { x: hole.position.x + 4, y: hole.position.y + 2 },
+  width: holeWidth,
+  height: holeHeight,
   shape: 'rect',
   fillStyle: 'rgba(255, 0, 0, 0.2)'
 })
@@ -337,14 +339,29 @@ const keys = {
 let lastKey = ''
 
 const isColliding = (object, collider) => {
-  const objectWidth = object.shape === 'circle' ? object.width * 2 : object.width
-  const objectHeight = object.shape === 'circle' ? object.height * 2 : object.height
-  const colliderWidth = collider.shape === 'circle' ? collider.width * 2 : collider.width
-  const colliderHeight = collider.shape === 'circle' ? collider.height * 2 : collider.height
-  return object.position.x + objectWidth > collider.position.x &&
-    object.position.x < collider.position.x + colliderWidth &&
-    object.position.y + objectHeight > collider.position.y &&
-    object.position.y < collider.position.y + colliderHeight
+  if (object.shape === 'circle' && collider.shape === 'circle') {
+    const dx = object.position.x - collider.position.x
+    const dy = object.position.y - collider.position.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    return distance < object.width + collider.width
+  }
+
+  if (object.shape === 'circle' && collider.shape === 'rect') {
+    // return true if object is intersecting more than 50% of it's size
+    const objectWidth = object.width / 2
+    const objectHeight = object.height / 4
+    const colliderWidth = collider.width
+    const colliderHeight = collider.height
+    return object.position.x + objectWidth > collider.position.x &&
+      object.position.x < collider.position.x + colliderWidth &&
+      object.position.y + objectHeight > collider.position.y &&
+      object.position.y < collider.position.y + colliderHeight
+  }
+
+  return object.position.x + object.width > collider.position.x &&
+    object.position.x < collider.position.x + collider.width &&
+    object.position.y + object.height > collider.position.y &&
+    object.position.y < collider.position.y + collider.height
 }
 
 const isMovePossible = (movable) => {
