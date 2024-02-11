@@ -39,7 +39,7 @@ const player = new Sprite({
     y: 232,//canvas.height / 2 - 32 / 2,
     z: 0,
   },
-  direction: 'right',
+  direction: 'down',
   velocity: { x: 0, y: 0 },
   frames: { max: spriteCount },
   sprites: {
@@ -72,7 +72,7 @@ const ballShadow = new Boundary({
   width: 3,
   height: 3,
   shape: 'circle',
-  fillStyle: 'rgba(0, 0, 0, 0.5)'
+  fillStyle: 'rgba(0, 0, 0, 0.25)'
 })
 
 const hole = new Sprite({
@@ -88,7 +88,7 @@ const holeBoundary = new Boundary({
   width: holeWidth,
   height: holeHeight,
   shape: 'rect',
-  fillStyle: 'rgba(255, 0, 0, 0.2)'
+  fillStyle: 'rgba(255, 0, 0, 0)'
 })
 
 const powerBar = new Boundary({
@@ -96,7 +96,7 @@ const powerBar = new Boundary({
   width: 10,
   height: 10,
   shape: 'rect',
-  fillStyle: 'rgba(255, 0, 255, 1)'
+  fillStyle: 'rgba(255, 0, 255, 0.5)'
 })
 
 const portalA = new Sprite({
