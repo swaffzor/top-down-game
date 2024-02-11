@@ -93,7 +93,8 @@ class Boundary {
       context.fillRect(this.position.x, this.position.y, this.width * temp, this.height)
     } else if (this.shape === 'circle') {
       context.beginPath()
-      context.arc(this.position.x, this.position.y, this.width * temp, 0, 2 * Math.PI) // x, y, radius, startAngle, endAngle, counterclockwise
+      context.arc(this.position.x, this.position.y, this.width * temp, 0, 2 * Math.PI)
+      // x,               y,                radius,   startAngle,   endAngle, counterclockwise
       context.fill()
     }
     // draw a border around the boundary

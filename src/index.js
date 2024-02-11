@@ -194,7 +194,6 @@ window.addEventListener('keydown', (event) => {
         state.animationMode = 'move'
       }
       break
-
     case 't':
       keys.t.pressed = true
       break
@@ -501,6 +500,7 @@ const animate = () => {
 animate()
 
 let barDirection = 'grow'
+
 const animatePowerBar = () => {
   // position the power bar
   if (player.direction === 'up') {
@@ -591,13 +591,17 @@ const animateBall = () => {
 
   if (!isInPortal && isColliding(ball, portalA)) {
     isInPortal = true
-    ball.position.x = portalB.position.x + portalB.width / 2
-    ball.position.y = portalB.position.y + portalB.height / 2
+    const dx = Math.abs(portalA.position.x - ball.position.x)
+    const dy = Math.abs(portalA.position.y - ball.position.y)
+    ball.position.x = portalB.position.x + dx
+    ball.position.y = portalB.position.y + dy
   }
   if (!isInPortal && isColliding(ball, portalB)) {
     isInPortal = true
-    ball.position.x = portalA.position.x + ball.velocity.x
-    ball.position.y = portalA.position.y + ball.velocity.y
+    const dx = Math.abs(portalB.position.x - ball.position.x)
+    const dy = Math.abs(portalB.position.y - ball.position.y)
+    ball.position.x = portalA.position.x + dx
+    ball.position.y = portalA.position.y + dy
   }
 
   if (ball.direction === 'up' || ball.direction === 'down') {
