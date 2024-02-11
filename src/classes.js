@@ -1,7 +1,7 @@
 const GRAVITY = 2
 
 class Sprite {
-  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction }) {
+  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction, width }) {
     this.image = new Image()
     this.image.src = image
 
@@ -17,7 +17,7 @@ class Sprite {
     }
 
     this.image.onload = () => {
-      this.width = this.image.width / this.frames.max
+      this.width = width ?? this.image.width / this.frames.max
       this.height = this.image.height
       console.log(this.image.src, `${this.width}x${this.height}`)
     }
@@ -84,6 +84,7 @@ class Boundary {
     this.velocity = { x: 1, y: 1, z: 0 }
     this.direction = ''
     this.visible = true
+    this.time = 0
   }
 
   draw() {

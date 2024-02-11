@@ -466,6 +466,8 @@ const animate = () => {
 
   if (isColliding(ball, holeBoundary)) {
     ball.visible = false
+    if (ball.velocity.x < 2) ball.velocity.x = 0
+    if (ball.velocity.y < 2) ball.velocity.y = 0
     console.log('ball in hole')
   } else {
     ball.visible = true
@@ -488,8 +490,17 @@ const animate = () => {
       default:
         break;
     }
-  } else {
   }
+
+  if (isColliding(ball, portalA) || isColliding(ball, portalB)) {
+    if (ball.direction === 'right') ball.position.x++
+    if (ball.direction === 'left') ball.position.x--
+    if (ball.direction === 'up') ball.position.y--
+    if (ball.direction === 'down') ball.position.y++
+    console.log('adjusting ball')
+  }
+
+
   document.getElementById('stat1').innerHTML = `player: x: ${background.position.x}, y: ${background.position.y}`
   document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} [w:${ball.width} v:${ball.visible}]`
   document.getElementById('stat3').innerHTML = `hole: x: ${Math.floor(hole.position.x)}, y: ${Math.floor(hole.position.y)}`
@@ -571,7 +582,7 @@ const animatePowerBar = () => {
 }
 
 let counter = 0
-let isInPortal = false
+let ballHasPortaled = false
 
 const animateBall = () => {
   ball.draw()
@@ -589,15 +600,15 @@ const animateBall = () => {
     ball.position.x += ball.velocity.x
   }
 
-  if (!isInPortal && isColliding(ball, portalA)) {
-    isInPortal = true
+  if (!ballHasPortaled && isColliding(ball, portalA)) {
+    ballHasPortaled = true
     const dx = Math.abs(portalA.position.x - ball.position.x)
     const dy = Math.abs(portalA.position.y - ball.position.y)
     ball.position.x = portalB.position.x + dx
     ball.position.y = portalB.position.y + dy
   }
-  if (!isInPortal && isColliding(ball, portalB)) {
-    isInPortal = true
+  if (!ballHasPortaled && isColliding(ball, portalB)) {
+    ballHasPortaled = true
     const dx = Math.abs(portalB.position.x - ball.position.x)
     const dy = Math.abs(portalB.position.y - ball.position.y)
     ball.position.x = portalA.position.x + dx
@@ -620,6 +631,7 @@ const animateBall = () => {
   }
 
   if (ball.direction === 'left' || ball.direction === 'right') {
+    ball.position.y -= ball.velocity.y
     if (counter < 20) {
       ball.position.y -= 2 * Math.sin(Math.PI / 4)
     } else if (counter < 39) {
@@ -640,7 +652,7 @@ const animateBall = () => {
     window.requestAnimationFrame(animateBall)
   } else {
     counter = 0
-    isInPortal = false
+    ballHasPortaled = false
   }
 }
 
