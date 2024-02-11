@@ -54,3 +54,19 @@
     right: 0;
   }
 }
+
+#banner {
+  color: rgb(191, 49, 167);
+  font-size: 3rem;
+  font-weight: bold;
+  /* add a shadow */
+  text-shadow: 2px 2px 4px #000000;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  &.show {
+    display: block;
+  }
+}

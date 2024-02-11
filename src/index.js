@@ -146,7 +146,9 @@ const drawables = [
 ]
 
 let state = {
-  animationMode: 'move'
+  animationMode: 'move',
+  par: 3,
+  strokes: 0,
 }
 
 window.addEventListener('keydown', (event) => {
@@ -183,6 +185,7 @@ window.addEventListener('keydown', (event) => {
         window.requestAnimationFrame(animatePowerBar)
       } else if (state.animationMode === 'powerBar') {
         state.animationMode = 'move'
+        state.strokes++
         ball.velocity.x = powerBar.width / 100
         // ball.velocity.x = club.power * .52 / 100 // temporary testing
         ball.velocity.y = powerBar.height / 100
@@ -469,6 +472,8 @@ const animate = () => {
     if (ball.velocity.x < 2) ball.velocity.x = 0
     if (ball.velocity.y < 2) ball.velocity.y = 0
     console.log('ball in hole')
+    document.getElementById('banner').classList.add('show')
+    document.getElementById('banner').innerHTML = state.strokes === 1 ? "HOLE IN ONE!!!" : state.par - state.strokes === 0 ? 'Par!' : state.par - state.strokes === 1 ? 'Birdie!' : state.par - state.strokes === 2 ? 'Eagle!' : state.par - state.strokes === 3 ? 'Albatross!' : state.strokes - state.par
   } else {
     ball.visible = true
   }
@@ -500,10 +505,9 @@ const animate = () => {
     console.log('adjusting ball')
   }
 
-
-  document.getElementById('stat1').innerHTML = `player: x: ${background.position.x}, y: ${background.position.y}`
   document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} [w:${ball.width} v:${ball.visible}]`
   document.getElementById('stat3').innerHTML = `hole: x: ${Math.floor(hole.position.x)}, y: ${Math.floor(hole.position.y)}`
+  document.getElementById('stat1').innerHTML = `Par ${state.par} | Strokes ${state.strokes}`
 
   window.requestAnimationFrame(animate)
 }
