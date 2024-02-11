@@ -60,11 +60,19 @@ const club = {
 }
 
 const ball = new Boundary({
-  position: { x: 500, y: 250 },
+  position: { x: 500, y: 250, z: 0 },
   width: 3,
   height: 3,
   shape: 'circle',
   fillStyle: 'rgba(255, 255, 255, 1)'
+})
+
+const ballShadow = new Boundary({
+  position: { x: ball.position.x, y: ball.position.y + 3 },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  fillStyle: 'rgba(0, 0, 0, 0.5)'
 })
 
 const hole = new Sprite({
@@ -126,6 +134,7 @@ collisionsMap.forEach((row, y) => {
 const grounds = [background, foreground]
 
 const movables = [
+  ballShadow,
   ball,
   portalA,
   portalB,
@@ -139,6 +148,7 @@ const drawables = [
   portalA,
   portalB,
   hole,
+  ballShadow,
   ball,
   player,
   foreground,
@@ -469,6 +479,7 @@ const animate = () => {
 
   if (isColliding(ball, holeBoundary)) {
     ball.visible = false
+    ballShadow.visible = false
     if (ball.velocity.x < 2) ball.velocity.x = 0
     if (ball.velocity.y < 2) ball.velocity.y = 0
     console.log('ball in hole')
@@ -503,11 +514,12 @@ const animate = () => {
     if (ball.direction === 'up') ball.position.y--
     if (ball.direction === 'down') ball.position.y++
     console.log('adjusting ball')
+    ballShadow.position = { ...ball.position, y: ball.position.y + 3 }
   }
 
-  document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} [w:${ball.width} v:${ball.visible}]`
-  document.getElementById('stat3').innerHTML = `hole: x: ${Math.floor(hole.position.x)}, y: ${Math.floor(hole.position.y)}`
   document.getElementById('stat1').innerHTML = `Par ${state.par} | Strokes ${state.strokes}`
+  document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}`
+  document.getElementById('stat3').innerHTML = `shadow: x: ${Math.floor(ballShadow.position.x)}, y: ${Math.floor(ballShadow.position.y)}`
 
   window.requestAnimationFrame(animate)
 }
@@ -542,44 +554,16 @@ const animatePowerBar = () => {
   powerBar.draw()
   ball.draw()
 
+  const dimension = player.direction === 'up' || player.direction === 'down' ? 'height' : 'width'
   // animate the power bar
   if (barDirection === 'grow') {
-    if (player.direction === 'right') {
-      if (powerBar.width < club.power) powerBar.width += BAR_VELOCITY
-      else barDirection = 'shrink'
-    }
-    if (player.direction === 'down') {
-      if (powerBar.height < club.power) powerBar.height += BAR_VELOCITY
-      else barDirection = 'shrink'
-    }
-    if (player.direction === 'left') {
-      if (powerBar.width < club.power) powerBar.width += BAR_VELOCITY
-      else barDirection = 'shrink'
-    }
-    if (player.direction === 'up') {
-      if (powerBar.height < club.power) powerBar.height += BAR_VELOCITY
-      else barDirection = 'shrink'
-    }
+    if (powerBar[dimension] < club.power) powerBar[dimension] += BAR_VELOCITY
+    else barDirection = 'shrink'
+  } else if (barDirection === 'shrink') {
+    if (powerBar[dimension] > 10) powerBar[dimension] -= BAR_VELOCITY
+    else barDirection = 'grow'
   }
-  else if (barDirection === 'shrink') {
-    if (player.direction === 'right') {
-      if (powerBar.width > 10) powerBar.width -= BAR_VELOCITY
-      else barDirection = 'grow'
-    }
-    if (player.direction === 'down') {
-      if (powerBar.height > 10) powerBar.height -= BAR_VELOCITY
-      else barDirection = 'grow'
-    }
-    if (player.direction === 'left') {
-      if (powerBar.width > 10) powerBar.width -= BAR_VELOCITY
-      else barDirection = 'grow'
-    }
-    if (player.direction === 'up') {
-      if (powerBar.height > 10) powerBar.height -= BAR_VELOCITY
-      else barDirection = 'grow'
-    }
-  }
-  else if (powerBar.width === club.power) barDirection = 'shrink'
+  if (powerBar.width === club.power) barDirection = 'shrink'
   else if (powerBar.width === 0) barDirection = 'grow'
 
   if (state.animationMode === 'powerBar') window.requestAnimationFrame(animatePowerBar)
@@ -620,6 +604,8 @@ const animateBall = () => {
   }
 
   if (ball.direction === 'up' || ball.direction === 'down') {
+    ballShadow.position.x = ball.position.x
+    ballShadow.position.y = ball.position.y + 3
     if (counter === 20) {
       ball.width += 1
     }
@@ -636,14 +622,28 @@ const animateBall = () => {
 
   if (ball.direction === 'left' || ball.direction === 'right') {
     ball.position.y -= ball.velocity.y
+    // have the ball shadow follow the ball
+    ballShadow.position.x = ball.position.x
+    if (ball.position.z === 0) ballShadow.position.y = ball.position.y + 3
+
+    const dy = Math.abs(ballShadow.position.y - 3 - ball.position.y)
+    ballShadow.position.y -= dy / (101 - counter)
     if (counter < 20) {
       ball.position.y -= 2 * Math.sin(Math.PI / 4)
-    } else if (counter < 39) {
+      ball.position.z += 1
+      // ballShadow.position.y += 1
+    } else if (counter < 50) {
       ball.position.y -= Math.sin(.747)
+      ball.position.z += 1
+      // ballShadow.position.y += 1
+      // const dy = Math.abs(ballShadow.position.y - 3 - ball.position.y)
+      // ballShadow.position.y += dy / (101 - counter)
     } else if (counter < 75) {
+      ball.position.z -= 1
       ball.position.y -= Math.sin(-.89) * 3 / 2
-    } else if (counter < 100) {
-      // no op, straight line, roll on ground
+      // const dy = Math.abs(ballShadow.position.y - 3 - ball.position.y)
+      // ballShadow.position.y -= dy / (101 - counter)
+    } else if (counter <= 100) {
 
     }
   }

@@ -12,13 +12,14 @@ Me exploring game developing in vanilla HTML, CSS, and JavaScript
 
 ## Todo
 
-- [-] Golf hole
+- [x] Golf hole
 
   - [x] Golf hole asset
   - [x] Golf hole model in code
   - [x] Golf collision with the hole
 
-- [] Golf ball arc animation
+- [-] Golf ball arc animation
+- [x] Golf ball shadow animation
 
 - [] Golf club
 
