@@ -85,17 +85,30 @@ class Boundary {
     this.direction = ''
     this.visible = true
     this.time = 0
+    this.rotation = 0
   }
 
   draw() {
-    const temp = this.visible ? 1 : 0
+    const visible = this.visible ? 1 : 0
     context.fillStyle = this.fillStyle
-    if (this.shape === 'rect') {
-      context.fillRect(this.position.x, this.position.y, this.width * temp, this.height)
+
+    if (this.rotation > 0) {
+      context.save();
+      context.translate(this.position.x, this.position.y);
+      context.rotate(this.rotation);
+      if (this.shape === 'rect') {
+        context.fillRect(0, -this.height, this.width * visible, this.height)
+      } else if (this.shape === 'circle') {
+        context.beginPath()
+        context.arc(0, -this.height, this.width * visible, 0, 2 * Math.PI)
+        context.fill()
+      }
+      context.restore();
+    } else if (this.shape === 'rect') {
+      context.fillRect(this.position.x, this.position.y, this.width * visible, this.height)
     } else if (this.shape === 'circle') {
       context.beginPath()
-      context.arc(this.position.x, this.position.y, this.width * temp, 0, 2 * Math.PI)
-      // x,               y,                radius,   startAngle,   endAngle, counterclockwise
+      context.arc(this.position.x, this.position.y, this.width * visible, 0, 2 * Math.PI)
       context.fill()
     }
     // draw a border around the boundary
