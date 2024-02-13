@@ -67,12 +67,20 @@ const ball = new Boundary({
   fillStyle: 'rgba(255, 255, 255, 1)'
 })
 
+const ballTarget = new Boundary({
+  position: { x: ball.position.x, y: ball.position.y },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  fillStyle: 'rgba(255, 0, 0, 0.75)'
+})
+
 const ballShadow = new Boundary({
   position: { x: ball.position.x, y: ball.position.y + 3 },
   width: 3,
   height: 3,
   shape: 'circle',
-  fillStyle: 'rgba(255, 0, 0, 0.75)'
+  fillStyle: 'rgba(0, 0, 0, 0.5)'
 })
 
 const hole = new Sprite({
@@ -81,12 +89,10 @@ const hole = new Sprite({
   frames: { max: 1 },
 })
 
-const holeWidth = 8
-const holeHeight = 6
 const holeBoundary = new Boundary({
   position: { x: hole.position.x + 4, y: hole.position.y + 2 },
-  width: holeWidth,
-  height: holeHeight,
+  width: 15,
+  height: 10,
   shape: 'rect',
   fillStyle: 'rgba(255, 0, 0, 0)'
 })
@@ -134,6 +140,7 @@ collisionsMap.forEach((row, y) => {
 const grounds = [background, foreground]
 
 const movables = [
+  ballTarget,
   ballShadow,
   ball,
   portalA,
@@ -165,9 +172,13 @@ let state = {
 const STEP = 1
 const RUN = 2
 const OFFSET = 3
+const MAX_BALL_FRAMES = 100
 let barDirection = 'grow'
-let barVelocity = 3
-let barSpeed = 0.02
+let barHeightSpeed = 3
+let barAngleSpeed = 0.05
+let ballFrames = MAX_BALL_FRAMES
+let counter = 0
+let ballHasPortaled = false
 
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
@@ -203,9 +214,9 @@ window.addEventListener('keydown', (event) => {
         window.requestAnimationFrame(animatePowerBar)
       } else if (state.animationMode === 'powerBar') {
         state.animationMode = 'rotateBar'
-        // ball.velocity.x = club.power * .52 / 100 // temporary testing
-        ball.velocity.x = powerBar.width / 100
+        ball.velocity.x = powerBar.height / 100
         ball.velocity.y = powerBar.height / 100
+        ballFrames = MAX_BALL_FRAMES * powerBar.height / club.power
       } else if (state.animationMode === 'rotateBar') {
         state.animationMode = 'move'
         state.strokes++
@@ -526,7 +537,7 @@ const animate = () => {
 
   document.getElementById('stat1').innerHTML = `Par ${state.par} | Strokes ${state.strokes}`
   document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}`
-  document.getElementById('stat3').innerHTML = `powerBar: angle: ${(powerBar.rotation).toFixed(2)}`
+  document.getElementById('stat3').innerHTML = `<pre>ball: ${JSON.stringify({ ...ball, counter, ballFrames }, null, 2)}</pre>`
 
   window.requestAnimationFrame(animate)
 }
@@ -534,11 +545,10 @@ const animate = () => {
 animate()
 
 const animatePowerBar = () => {
-
+  // position the power bar and determine power based on player's direction
   if (state.animationMode === 'powerBar') {
-    // position the power bar
     if (player.direction === 'up' && powerBar.direction !== 'up') {
-      powerBar.rotation = 2 * Math.PI // 0.01 to avoid 0
+      powerBar.rotation = 2 * Math.PI // starting at 2PI to avoid jittering when rotating back to 0
       powerBar.direction = 'up'
     }
     if (player.direction === 'right' && powerBar.direction !== 'right') {
@@ -555,88 +565,70 @@ const animatePowerBar = () => {
     }
 
     // animate the power bar
-
     if (barDirection === 'grow') {
-      if (powerBar.height < club.power) powerBar.height += barVelocity
+      if (powerBar.height < club.power) powerBar.height += barHeightSpeed
       else barDirection = 'shrink'
     } else if (barDirection === 'shrink') {
-      if (powerBar.height > 10) powerBar.height -= barVelocity
+      if (powerBar.height > 10) powerBar.height -= barHeightSpeed
       else barDirection = 'grow'
     }
     if (powerBar.height === club.power) barDirection = 'shrink'
     else if (powerBar.height === 0) barDirection = 'grow'
-
-    powerBar.draw()
   }
 
   if (state.animationMode === 'rotateBar') {
     // console.log('rotating bar')
-    powerBar.rotation += barSpeed
+    powerBar.rotation += barAngleSpeed
 
     if (player.direction === 'down') {
       if (powerBar.rotation < 3 * Math.PI + 1 * Math.PI / 4) {
-        barSpeed = -barSpeed;
+        barAngleSpeed = -barAngleSpeed;
         // file deepcode ignore DuplicateIfBody: <please specify a reason of ignoring this>
       }
       if (powerBar.rotation > 3 * Math.PI - 1 * Math.PI / 4) {
-        barSpeed = -barSpeed;
+        barAngleSpeed = -barAngleSpeed;
       }
     }
     if (player.direction === 'right') {
       if (powerBar.rotation < 2 * Math.PI + Math.PI / 2 + Math.PI / 4) {
-        barSpeed = -barSpeed;
+        barAngleSpeed = -barAngleSpeed;
       }
       if (powerBar.rotation > 2 * Math.PI + Math.PI / 2 - Math.PI / 4) {
-        barSpeed = -barSpeed;
+        barAngleSpeed = -barAngleSpeed;
       }
     }
     if (player.direction === 'up') {
       if (powerBar.rotation < 7 * Math.PI / 4) {
-        barSpeed = -barSpeed;
+        barAngleSpeed = -barAngleSpeed;
       }
       if (powerBar.rotation > 2 * Math.PI + 1 * Math.PI / 4) {
-        barSpeed = -barSpeed;
+        barAngleSpeed = -barAngleSpeed;
       }
     }
     if (player.direction === 'left') {
       if (powerBar.rotation < 2 * Math.PI + 3 * Math.PI / 2 + Math.PI / 4) {
-        barSpeed = -barSpeed;
+        barAngleSpeed = -barAngleSpeed;
       }
       if (powerBar.rotation > 2 * Math.PI + 3 * Math.PI / 2 - Math.PI / 4) {
-        barSpeed = -barSpeed;
+        barAngleSpeed = -barAngleSpeed;
       }
     }
 
-    powerBar.draw()
   }
+  powerBar.draw()
+  // ballTarget.draw()
+
+  // set ball's position to calculated points
+  const endOfBarX = powerBar.position.x + Math.cos(powerBar.rotation - Math.PI / 2) * powerBar.height
+  const endOfBarY = powerBar.position.y + Math.sin(powerBar.rotation - Math.PI / 2) * powerBar.height
+  ballTarget.position.x = endOfBarX - ball.width;
+  ballTarget.position.y = endOfBarY - ball.height;
 
   if (state.animationMode !== 'move') window.requestAnimationFrame(animatePowerBar)
-  // else if (state.animationMode === 'move') {
-  // Reset current transformation matrix to the identity matrix
-  // context.setTransform(1, 0, 0, 1, 0, 0);
-  // }
-  ball.draw()
 }
-
-let counter = 0
-let ballHasPortaled = false
+window.requestAnimationFrame(animatePowerBar)
 
 const animateBall = () => {
-  ball.draw()
-
-  if (ball.direction === 'up') {
-    ball.position.y -= ball.velocity.y
-  }
-  if (ball.direction === 'down') {
-    ball.position.y += ball.velocity.y
-  }
-  if (ball.direction === 'left') {
-    ball.position.x -= ball.velocity.x
-  }
-  if (ball.direction === 'right') {
-    ball.position.x += ball.velocity.x
-  }
-
   if (!ballHasPortaled && isColliding(ball, portalA)) {
     ballHasPortaled = true
     const dx = Math.abs(portalA.position.x - ball.position.x)
@@ -652,64 +644,25 @@ const animateBall = () => {
     ball.position.y = portalA.position.y + dy
   }
 
+  // set ball's position to calculated points
+  const dx = powerBar.position.x + Math.cos(powerBar.rotation - Math.PI / 2) * powerBar.height * counter / ballFrames
+  const dy = powerBar.position.y + Math.sin(powerBar.rotation - Math.PI / 2) * powerBar.height * counter / ballFrames
+  const dz = (ballFrames * counter - 0.5 * 2 * Math.pow(counter, 2)) / ballFrames
+  ball.width = dz > 3 ? dz : 3
+  ball.position.z = dz
+  ball.position.x = dx
+  ball.position.y = dy
+  ballShadow.position.x = ball.position.x - dz
+  ballShadow.position.y = ball.position.y - dz
+  ballShadow.fillStyle = `rgba(0, 0, 0, ${0.5 - dz / 100})`
+  ballShadow.draw()
+  ball.draw()
 
-  // // set ball's position to calculated points
-  // ball.position.x = endOfBarX - ball.width;
-  // ball.position.y = endOfBarY - ball.height;
-
-  // if (ball.direction === 'up' || ball.direction === 'down') {
-  //   ballShadow.position.x = ball.position.x
-  //   ballShadow.position.y = ball.position.y + 3
-  //   if (counter === 20) {
-  //     ball.width += 1
-  //   }
-  //   if (counter === 40) {
-  //     ball.width += 1
-  //   }
-  //   if (counter === 60) {
-  //     ball.width -= 1
-  //   }
-  //   if (counter === 80) {
-  //     ball.width -= 1
-  //   }
-  // }
-
-  // if (ball.direction === 'left' || ball.direction === 'right') {
-  //   ball.position.y -= ball.velocity.y
-  //   // have the ball shadow follow the ball
-  //   ballShadow.position.x = ball.position.x
-  //   if (ball.position.z === 0) ballShadow.position.y = ball.position.y + 3
-
-  //   const dy = Math.abs(ballShadow.position.y - 3 - ball.position.y)
-  //   ballShadow.position.y -= dy / (101 - counter)
-  //   if (counter < 20) {
-  //     ball.position.y -= 2 * Math.sin(Math.PI / 4)
-  //     ball.position.z += 1
-  //     // ballShadow.position.y += 1
-  //   } else if (counter < 50) {
-  //     ball.position.y -= Math.sin(.747)
-  //     ball.position.z += 1
-  //     // ballShadow.position.y += 1
-  //     // const dy = Math.abs(ballShadow.position.y - 3 - ball.position.y)
-  //     // ballShadow.position.y += dy / (101 - counter)
-  //   } else if (counter < 75) {
-  //     ball.position.z -= 1
-  //     ball.position.y -= Math.sin(-.89) * 3 / 2
-  //     // const dy = Math.abs(ballShadow.position.y - 3 - ball.position.y)
-  //     // ballShadow.position.y -= dy / (101 - counter)
-  //   } else if (counter <= 100) {
-
-  //   }
-  // }
-
-  // idea: hit ball through portals, can use:
-  // ball.position.y = counter < 50 ? Math.pow(ball.position.x, 2) / 1000 : Math.pow(ball.position.x, 2) / 1000 + 100
-
-  if (counter < 100) {
+  if (counter < ballFrames) {
     counter++
     window.requestAnimationFrame(animateBall)
   } else {
-    counter = 0
+    counter = MAX_BALL_FRAMES - MAX_BALL_FRAMES
     ballHasPortaled = false
   }
 }
