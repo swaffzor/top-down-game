@@ -75,7 +75,15 @@ class Boundary {
   static width = 16
   static height = 16
   static isBoundary = true
-  constructor({ position, width, height, fillStyle = 'rgba(255, 0, 0, 0.2)', shape = 'rect' }) {
+  constructor({ position,
+    width,
+    height,
+    name,
+    fillStyle = 'rgba(255, 0, 0, 0.2)',
+    strokeStyle = 'rgba(255, 0, 0, 0.8)',
+    shape = 'rect',
+    render = 'fill'
+  }) {
     this.position = position
     this.width = width || Boundary.width
     this.height = height || Boundary.height
@@ -86,30 +94,42 @@ class Boundary {
     this.visible = true
     this.time = 0
     this.rotation = 0
+    this.name = name
+    this.render = render
+    this.strokeStyle = strokeStyle
   }
 
   draw() {
     const visible = this.visible ? 1 : 0
     context.fillStyle = this.fillStyle
+    context.strokeStyle = this.strokeStyle
 
-    if (this.rotation > 0) {
+    if (this.rotation >= 0) {
       context.save();
       context.translate(this.position.x, this.position.y);
       context.rotate(this.rotation);
       if (this.shape === 'rect') {
-        context.fillRect(0, -this.height, this.width * visible, this.height)
+        this.render === 'fill'
+          ? context.fillRect(0, -this.height, this.width * visible, this.height)
+          : context.strokeRect(0, -this.height, this.width * visible, this.height)
       } else if (this.shape === 'circle') {
         context.beginPath()
         context.arc(0, -this.height, this.width * visible, 0, 2 * Math.PI)
-        context.fill()
+        this.render === 'fill'
+          ? context.fill()
+          : context.stroke()
       }
       context.restore();
     } else if (this.shape === 'rect') {
-      context.fillRect(this.position.x, this.position.y, this.width * visible, this.height)
+      this.render === 'fill'
+        ? context.fillRect(this.position.x, this.position.y, this.width * visible, this.height)
+        : context.strokeRect(this.position.x, this.position.y, this.width * visible, this.height)
     } else if (this.shape === 'circle') {
       context.beginPath()
       context.arc(this.position.x, this.position.y, this.width * visible, 0, 2 * Math.PI)
-      context.fill()
+      this.render === 'fill'
+        ? context.fill()
+        : context.stroke()
     }
     // draw a border around the boundary
     // context.strokeStyle = 'rgba(255, 0, 0, 0.8)'

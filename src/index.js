@@ -54,6 +54,80 @@ const player = new Sprite({
   },
 })
 
+const portalA = new Sprite({
+  image: './sprites/portal3.png',
+  position: { x: 570, y: 220 },
+  frames: { max: 7 },
+})
+
+const portalB = new Sprite({
+  image: './sprites/portal3.png',
+  position: { x: 262, y: 200 },
+  frames: { max: 7 },
+})
+
+const hole = new Sprite({
+  image: './sprites/hole.png',
+  position: { x: 310, y: 225 },
+  frames: { max: 1 },
+})
+
+const holeBoundary = new Boundary({
+  name: 'holeBoundary',
+  position: { x: hole.position.x + 4, y: hole.position.y + 2 },
+  width: 15,
+  height: 10,
+  shape: 'rect',
+  fillStyle: 'rgba(255, 0, 0, 0)'
+})
+
+const ball = new Boundary({
+  name: 'ball',
+  position: { x: 500, y: 250, z: 0 },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  fillStyle: 'rgba(255, 255, 255, 1)'
+})
+
+const ballTarget = new Boundary({
+  name: 'ballTarget',
+  position: { x: ball.position.x, y: ball.position.y },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  fillStyle: 'rgba(255, 0, 0, 0.75)'
+})
+
+const ballShadow = new Boundary({
+  name: 'ballShadow',
+  position: { x: ball.position.x, y: ball.position.y + 3 },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  fillStyle: 'rgba(0, 0, 0, 0.5)'
+})
+
+const powerBar = new Boundary({
+  name: 'powerBar',
+  position: { ...ball.position },
+  width: 10,
+  height: 10,
+  shape: 'rect',
+  fillStyle: 'rgba(255, 0, 255, 0.5)'
+})
+
+const clubRadius = new Boundary({
+  name: 'clubRadius',
+  position: { x: player.position.x + 8, y: player.position.y + 11 },
+  width: 10,
+  height: 10,
+  shape: 'circle',
+  fillStyle: 'rgba(0, 0, 255, 0.25)',
+  strokeStyle: 'rgba(0, 0, 255, 0.5)',
+  render: 'stroke'
+})
+
 let club = {
   position: { x: player.position.x + 16, y: player.position.y },
   max: 100,
@@ -74,64 +148,6 @@ let club = {
   }
 }
 club = { ...club.bag[club.name], bag: { ...club.bag } }
-
-const ball = new Boundary({
-  position: { x: 500, y: 250, z: 0 },
-  width: 3,
-  height: 3,
-  shape: 'circle',
-  fillStyle: 'rgba(255, 255, 255, 1)'
-})
-
-const ballTarget = new Boundary({
-  position: { x: ball.position.x, y: ball.position.y },
-  width: 3,
-  height: 3,
-  shape: 'circle',
-  fillStyle: 'rgba(255, 0, 0, 0.75)'
-})
-
-const ballShadow = new Boundary({
-  position: { x: ball.position.x, y: ball.position.y + 3 },
-  width: 3,
-  height: 3,
-  shape: 'circle',
-  fillStyle: 'rgba(0, 0, 0, 0.5)'
-})
-
-const hole = new Sprite({
-  image: './sprites/hole.png',
-  position: { x: 310, y: 225 },
-  frames: { max: 1 },
-})
-
-const holeBoundary = new Boundary({
-  position: { x: hole.position.x + 4, y: hole.position.y + 2 },
-  width: 15,
-  height: 10,
-  shape: 'rect',
-  fillStyle: 'rgba(255, 0, 0, 0)'
-})
-
-const powerBar = new Boundary({
-  position: { ...ball.position },
-  width: 10,
-  height: 10,
-  shape: 'rect',
-  fillStyle: 'rgba(255, 0, 255, 0.5)'
-})
-
-const portalA = new Sprite({
-  image: './sprites/portal3.png',
-  position: { x: 570, y: 220 },
-  frames: { max: 7 },
-})
-
-const portalB = new Sprite({
-  image: './sprites/portal3.png',
-  position: { x: 262, y: 200 },
-  frames: { max: 7 },
-})
 
 const collisionsMap = []
 for (let i = 0; i < collisions.length; i += 26) {
@@ -196,6 +212,7 @@ let ballFrames = MAX_BALL_FRAMES
 let counter = 0
 let ballHasPortaled = false
 let timeOutValue = 0
+let radiusTimeout = 0
 
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
@@ -286,21 +303,39 @@ window.addEventListener('keydown', (event) => {
       break
     case 'n':
       keys.n.pressed = true
-      if (club.name === '1') club.name = 'w'
-      else if (club.name === 'w') club.name = 'p'
-      else if (club.name === 'p') club.name = 'p'
+      if (club.name === '1') club.name = '1'
+      else if (club.name === 'w') club.name = '9'
+      else if (club.name === 'p') club.name = 'w'
       else club.name = (parseInt(club.name) - 1).toString()
       club = { ...club.bag[club.name], bag: { ...club.bag }, max: club.bag[club.name].max * 1.25 }
       if (powerBar.height > club.max) powerBar.height = club.max
+
+      radiusTimeout && clearTimeout(radiusTimeout)
+      if (drawables.some(d => d.name === 'clubRadius')) {
+        const temp = drawables.filter(d => d.name !== 'clubRadius')
+        drawables = [...temp]
+      }
+      clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
+      clubRadius.width = club.max
+      drawables.push(clubRadius)
       break
     case 'm':
       keys.m.pressed = true
-      if (club.name === 'p') club.name = 'w'
-      else if (club.name === 'w') club.name = '1'
-      else if (club.name === '9') club.name = '9'
+      if (club.name === 'p') club.name = 'p'
+      else if (club.name === 'w') club.name = 'p'
+      else if (club.name === '9') club.name = 'w'
       else club.name = (parseInt(club.name) + 1).toString()
       club = { ...club.bag[club.name], bag: { ...club.bag }, max: club.bag[club.name].max * 1.25 }
       if (powerBar.height > club.max) powerBar.height = club.max
+
+      radiusTimeout && clearTimeout(radiusTimeout)
+      if (drawables.some(d => d.name === 'clubRadius')) {
+        const temp = drawables.filter(d => d.name !== 'clubRadius')
+        drawables = [...temp]
+      }
+      clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
+      clubRadius.width = club.max
+      drawables.push(clubRadius)
       break
 
     default:
@@ -308,9 +343,17 @@ window.addEventListener('keydown', (event) => {
   }
 })
 
+const eraseClubRadius = () => {
+  radiusTimeout = setTimeout(() => {
+    const temp = drawables.filter(d => d.name !== 'clubRadius')
+    drawables = [...temp]
+    console.log('removed clubRadius')
+  }, 3000)
+}
+
 const eraseBallTarget = () => {
   timeOutValue = setTimeout(() => {
-    const temp = drawables.filter(d => d.position.x !== ballTarget.position.x && d.position.y !== ballTarget.position.y)
+    const temp = drawables.filter(d => d.name !== 'ballTarget')
     drawables = [...temp]
     console.log('removed ballTarget')
   }, 3000)
@@ -378,9 +421,11 @@ window.addEventListener('keyup', (event) => {
       break
     case 'n':
       keys.n.pressed = false
+      eraseClubRadius()
       break
     case 'm':
       keys.m.pressed = false
+      eraseClubRadius()
       break
 
     default:
@@ -629,14 +674,16 @@ const animate = () => {
     ballTarget.position.y = getDistanceY(powerBar)
   }
 
-  if (isColliding(ball, holeBoundary) && ball.position.z <= 0) {
+  if (isColliding(ball, holeBoundary) && ball.position.z <= 2) {
     ball.visible = false
     ballShadow.visible = false
+    ball.position.x = holeBoundary.position.x
+    ball.position.y = holeBoundary.position.y
     // if (ball.velocity.x < 2) ball.velocity.x = 0
     // if (ball.velocity.y < 2) ball.velocity.y = 0
     console.log('ball in hole')
     document.getElementById('banner').classList.add('show')
-    document.getElementById('banner').innerHTML = state.strokes === 1 ? "HOLE IN ONE!!!" : state.par - state.strokes === 0 ? 'Par!' : state.par - state.strokes === 1 ? 'Birdie!' : state.par - state.strokes === 2 ? 'Eagle!' : state.par - state.strokes === 3 ? 'Albatross!' : state.strokes - state.par
+    document.getElementById('banner').innerHTML = `${state.par - state.strokes > 0 ? '+' : '-'}${state.strokes === 1 ? "HOLE IN ONE!!!" : state.par - state.strokes === 0 ? 'Par!' : state.par - state.strokes === 1 ? 'Birdie!' : state.par - state.strokes === 2 ? 'Eagle!' : state.par - state.strokes === 3 ? 'Albatross!' : state.strokes - state.par}`
   } else {
     ball.visible = true
   }
@@ -669,8 +716,8 @@ const animate = () => {
   //   ballShadow.position = { ...ball.position, y: ball.position.y + 3 }
   // }
 
-  document.getElementById('stat1').innerHTML = `Par ${state.par} | Strokes ${state.strokes}`
-  document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}, w: ${Math.floor(ball.width)}`
+  document.getElementById('stat1').innerHTML = `<strong>Par ${state.par} | Strokes ${state.strokes}</strong>`
+  document.getElementById('stat2').innerHTML = `<strong> Club: ${parseInt(club.name) ? club.name + ' Iron' : club.name === 'w' ? 'Wedge' : 'Putter'}</strong> <br /> Ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}, w: ${Math.floor(ball.width)}`
   document.getElementById('stat3').innerHTML = `<pre>${JSON.stringify({ club: { name: club.name, max: club.max, loft: club.loft }, ...{ powerBar }, counter, ballFrames, ...{ state }, }, null, 2)}</pre>`
 
   window.requestAnimationFrame(animate)
@@ -837,19 +884,21 @@ const animateBall = () => {
     // set ball's position to calculated points
     const gravity = 2
     const dz = (ballFrames * counter - 0.5 * gravity * Math.pow(counter, 2)) / ballFrames * powerBar.height / club.max
-    ball.position.z = dz
     if (dz < 3 || club.loft < 3) {
       ball.width = 3
+      ball.position.z = 0
       ballShadow.position.x = ball.position.x
       ballShadow.position.y = ball.position.y
       console.log('set ball width to 3')
     } else if (dz > club.loft && club.loft > 3) {
       ball.width = club.loft
+      ball.position.z = club.loft
       ballShadow.position.x = ball.position.x - club.loft
       ballShadow.position.y = ball.position.y - club.loft
       console.log('set ball width to club.loft')
     } else {
       ball.width = dz
+      ball.position.z = dz
       ballShadow.position.x = ball.position.x - dz
       ballShadow.position.y = ball.position.y - dz
       console.log('set ball width to dz')
