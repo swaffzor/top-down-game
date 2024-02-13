@@ -54,9 +54,9 @@ const player = new Sprite({
   },
 })
 
-const club = {
+let club = {
   position: { x: player.position.x + 16, y: player.position.y },
-  power: 100
+  max: 100,
 }
 
 const ball = new Boundary({
@@ -217,7 +217,7 @@ window.addEventListener('keydown', (event) => {
         state.animationMode = 'rotateBar'
         ball.velocity.x = powerBar.height / 100
         ball.velocity.y = powerBar.height / 100
-        ballFrames = MAX_BALL_FRAMES * powerBar.height / club.power
+        ballFrames = MAX_BALL_FRAMES * powerBar.height / club.max
       } else if (state.animationMode === 'rotateBar') {
         state.animationMode = 'move'
         state.strokes++
@@ -226,6 +226,7 @@ window.addEventListener('keydown', (event) => {
       break
     case 'Escape':
       if (state.animationMode === 'powerBar') {
+        state.animationMode = 'move'
       } else if (state.animationMode === 'rotateBar') {
         state.animationMode = 'powerBar'
       }
@@ -572,7 +573,7 @@ const animate = () => {
     ballTarget.position.y = getDistanceY(powerBar)
   }
   if (keys.u.pressed) {
-    if (powerBar.height < club.power) powerBar.height += barHeightSpeed
+    if (powerBar.height < club.max) powerBar.height += barHeightSpeed
     ballTarget.position.x = getDistanceX(powerBar)
     ballTarget.position.y = getDistanceY(powerBar)
   }
@@ -708,13 +709,13 @@ const animatePowerBar = () => {
 
     // animate the power bar
     if (barDirection === 'grow') {
-      if (powerBar.height < club.power) powerBar.height += barHeightSpeed
+      if (powerBar.height < club.max) powerBar.height += barHeightSpeed
       else barDirection = 'shrink'
     } else if (barDirection === 'shrink') {
       if (powerBar.height > 10) powerBar.height -= barHeightSpeed
       else barDirection = 'grow'
     }
-    if (powerBar.height === club.power) barDirection = 'shrink'
+    if (powerBar.height === club.max) barDirection = 'shrink'
     else if (powerBar.height === 0) barDirection = 'grow'
   }
 
@@ -769,8 +770,8 @@ const animatePowerBar = () => {
 
 const animateBall = () => {
   ballTarget.width = ball.width
-  ballTarget.position.x = getDistanceX(powerBar, counter / ballFrames)
-  ballTarget.position.y = getDistanceY(powerBar, counter / ballFrames)
+  ballTarget.position.x = getDistanceX(powerBar, counter / ballFrames) + .01
+  ballTarget.position.y = getDistanceY(powerBar, counter / ballFrames) + .01
   if (state.portal === "" && isColliding(ball, portalA)) {
     console.log('portaled')
     portalB.rotation = powerBar.rotation
@@ -789,9 +790,26 @@ const animateBall = () => {
   } else {
     // set ball's position to calculated points
     const gravity = 2
-    const dz = (ballFrames * counter - 0.5 * gravity * Math.pow(counter, 2)) / ballFrames
-    ball.width = dz > 3 ? dz : 3
+    const dz = (ballFrames * counter - 0.5 * gravity * Math.pow(counter, 2)) / ballFrames * powerBar.height / club.max
     ball.position.z = dz
+    if (dz < 3 || club.loft < 3) {
+      ball.width = 3
+      ballShadow.position.x = ball.position.x
+      ballShadow.position.y = ball.position.y
+      console.log('set ball width to 3')
+    } else if (dz > club.loft && club.loft > 3) {
+      ball.width = club.loft
+      ballShadow.position.x = ball.position.x - club.loft
+      ballShadow.position.y = ball.position.y - club.loft
+      console.log('set ball width to club.loft')
+    } else {
+      ball.width = dz
+      ballShadow.position.x = ball.position.x - dz
+      ballShadow.position.y = ball.position.y - dz
+      console.log('set ball width to dz')
+    }
+    ballShadow.fillStyle = `rgba(0, 0, 0, ${0.5 - dz / 100})`
+    // ball.width = ball.position.z
     switch (state.portal) {
       case 'a':
         // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalA, counter / ballFrames)
@@ -808,9 +826,6 @@ const animateBall = () => {
         break;
     }
 
-    ballShadow.position.x = ball.position.x - dz
-    ballShadow.position.y = ball.position.y - dz
-    ballShadow.fillStyle = `rgba(0, 0, 0, ${0.5 - dz / 100})`
   }
   ballShadow.draw()
   ball.draw()
