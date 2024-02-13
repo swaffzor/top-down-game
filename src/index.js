@@ -57,7 +57,23 @@ const player = new Sprite({
 let club = {
   position: { x: player.position.x + 16, y: player.position.y },
   max: 100,
+  loft: 0,
+  name: '9',
+  bag: {
+    1: { name: '1', max: 100, loft: 3 },
+    2: { name: '2', max: 90, loft: 5 },
+    3: { name: '3', max: 80, loft: 7 },
+    4: { name: '4', max: 70, loft: 10 },
+    5: { name: '5', max: 60, loft: 13 },
+    6: { name: '6', max: 50, loft: 16 },
+    7: { name: '7', max: 40, loft: 19 },
+    8: { name: '8', max: 30, loft: 22 },
+    9: { name: '9', max: 20, loft: 25 },
+    w: { name: 'w', max: 10, loft: 30 },
+    p: { name: 'p', max: 35, loft: 0 },
+  }
 }
+club = { ...club.bag[club.name], bag: { ...club.bag } }
 
 const ball = new Boundary({
   position: { x: 500, y: 250, z: 0 },
@@ -268,6 +284,24 @@ window.addEventListener('keydown', (event) => {
       window.requestAnimationFrame(animateBall)
       keys.o.pressed = true
       break
+    case 'n':
+      keys.n.pressed = true
+      if (club.name === '1') club.name = 'w'
+      else if (club.name === 'w') club.name = 'p'
+      else if (club.name === 'p') club.name = 'p'
+      else club.name = (parseInt(club.name) - 1).toString()
+      club = { ...club.bag[club.name], bag: { ...club.bag }, max: club.bag[club.name].max * 1.25 }
+      if (powerBar.height > club.max) powerBar.height = club.max
+      break
+    case 'm':
+      keys.m.pressed = true
+      if (club.name === 'p') club.name = 'w'
+      else if (club.name === 'w') club.name = '1'
+      else if (club.name === '9') club.name = '9'
+      else club.name = (parseInt(club.name) + 1).toString()
+      club = { ...club.bag[club.name], bag: { ...club.bag }, max: club.bag[club.name].max * 1.25 }
+      if (powerBar.height > club.max) powerBar.height = club.max
+      break
 
     default:
       break;
@@ -341,6 +375,12 @@ window.addEventListener('keyup', (event) => {
       break
     case 'o':
       keys.o.pressed = false
+      break
+    case 'n':
+      keys.n.pressed = false
+      break
+    case 'm':
+      keys.m.pressed = false
       break
 
     default:
@@ -436,6 +476,12 @@ const keys = {
     pressed: false,
   },
   o: {
+    pressed: false,
+  },
+  n: {
+    pressed: false,
+  },
+  m: {
     pressed: false,
   },
 }
@@ -624,8 +670,8 @@ const animate = () => {
   // }
 
   document.getElementById('stat1').innerHTML = `Par ${state.par} | Strokes ${state.strokes}`
-  document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}`
-  document.getElementById('stat3').innerHTML = `<pre>powerBar: ${JSON.stringify({ ...powerBar, counter, ballFrames, ...state }, null, 2)}</pre>`
+  document.getElementById('stat2').innerHTML = `ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}, w: ${Math.floor(ball.width)}`
+  document.getElementById('stat3').innerHTML = `<pre>${JSON.stringify({ club: { name: club.name, max: club.max, loft: club.loft }, ...{ powerBar }, counter, ballFrames, ...{ state }, }, null, 2)}</pre>`
 
   window.requestAnimationFrame(animate)
 }
