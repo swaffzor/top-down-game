@@ -582,11 +582,11 @@ const animate = () => {
     ballTarget.position.y = getDistanceY(powerBar)
   }
 
-  if (isColliding(ball, holeBoundary)) {
+  if (isColliding(ball, holeBoundary) && ball.position.z <= 0) {
     ball.visible = false
     ballShadow.visible = false
-    if (ball.velocity.x < 2) ball.velocity.x = 0
-    if (ball.velocity.y < 2) ball.velocity.y = 0
+    // if (ball.velocity.x < 2) ball.velocity.x = 0
+    // if (ball.velocity.y < 2) ball.velocity.y = 0
     console.log('ball in hole')
     document.getElementById('banner').classList.add('show')
     document.getElementById('banner').innerHTML = state.strokes === 1 ? "HOLE IN ONE!!!" : state.par - state.strokes === 0 ? 'Par!' : state.par - state.strokes === 1 ? 'Birdie!' : state.par - state.strokes === 2 ? 'Eagle!' : state.par - state.strokes === 3 ? 'Albatross!' : state.strokes - state.par
@@ -630,6 +630,61 @@ const animate = () => {
 }
 
 animate()
+
+let tempshit = 0
+const tempAnimate = () => {
+  switch (tempshit) {
+    case 0:
+      ball.fillStyle = 'rgba(255, 0, 255, 1)'
+      break;
+    case 1:
+      ball.fillStyle = 'rgba(255, 0, 255, 0.75)'
+      ballTarget.fillStyle = 'rgba(255, 0, 0, 1)'
+      break;
+    case 2:
+      ball.fillStyle = 'rgba(255, 0, 255, 0.5)'
+      ballTarget.fillStyle = 'rgba(255, 0, 0, 0.75)'
+      break;
+    case 3:
+      ball.fillStyle = 'rgba(255, 0, 255, 0.25)'
+      ballTarget.fillStyle = 'rgba(255, 0, 0, 0.5)'
+      break;
+    case 4:
+      ball.fillStyle = 'rgba(255, 0, 255, 0)'
+      ballTarget.fillStyle = 'rgba(255, 0, 0, 0.25)'
+      break;
+    case 5:
+      ball.fillStyle = 'rgba(255, 0, 255, 0)'
+      ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB, counter / ballFrames)
+      ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB, counter / ballFrames)
+      break
+    // file deepcode ignore DuplicateCaseBody: <please specify a reason of ignoring this>
+    case 6:
+      ball.fillStyle = 'rgba(255, 0, 255, 0.25)'
+      break;
+    case 7:
+      ball.fillStyle = 'rgba(255, 0, 255, 0.5)'
+      ballTarget.fillStyle = 'rgba(255, 0, 0, 0.25)'
+      break;
+    case 8:
+      ball.fillStyle = 'rgba(255, 0, 255, 0.75)'
+      ballTarget.fillStyle = 'rgba(255, 0, 0, .5)'
+      break;
+    case 9:
+      ball.fillStyle = 'rgba(255, 0, 255, 1)'
+      ballTarget.fillStyle = 'rgba(255, 0, 0, .75)'
+      break;
+    case 10:
+      ball.fillStyle = 'rgba(255, 255, 255, 1)'
+      ballTarget.fillStyle = 'rgba(255, 0, 0, 1)'
+      window.requestAnimationFrame(animateBall)
+      break;
+    default:
+      break;
+  }
+  tempshit++
+  if (tempshit <= 11) window.requestAnimationFrame(tempAnimate)
+}
 
 const animatePowerBar = () => {
   // position the power bar and determine power based on player's direction
@@ -713,45 +768,50 @@ const animatePowerBar = () => {
 }
 
 const animateBall = () => {
+  ballTarget.width = ball.width
+  ballTarget.position.x = getDistanceX(powerBar, counter / ballFrames)
+  ballTarget.position.y = getDistanceY(powerBar, counter / ballFrames)
   if (state.portal === "" && isColliding(ball, portalA)) {
     console.log('portaled')
     portalB.rotation = powerBar.rotation
     state.portal = "b"
-    ballTarget.position.x = getDistanceX(powerBar)
-    ballTarget.position.y = getDistanceY(powerBar)
     drawables.push(ballTarget)
-    ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB)
-    ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB)
+    window.requestAnimationFrame(tempAnimate)
+    return
+    // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB)
+    // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB)
   } else if (state.portal === "" && isColliding(ball, portalB)) {
     console.log('portaled')
     portalA.rotation = powerBar.rotation
     state.portal = 'a'
     ball.position.x = getDistanceX(portalA)
     ball.position.y = getDistanceY(portalA)
-  }
+  } else {
+    // set ball's position to calculated points
+    const gravity = 2
+    const dz = (ballFrames * counter - 0.5 * gravity * Math.pow(counter, 2)) / ballFrames
+    ball.width = dz > 3 ? dz : 3
+    ball.position.z = dz
+    switch (state.portal) {
+      case 'a':
+        // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalA, counter / ballFrames)
+        // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalA, counter / ballFrames)
+        break;
+      case 'b':
+        // ball.position.x = portalB.position.x + portalB.width - ball.position.x + getDistanceX(portalB, counter / ballFrames)
+        // ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalB, counter / ballFrames)
+        break;
+      case '':
+      default:
+        ball.position.x = getDistanceX(powerBar, counter / ballFrames)
+        ball.position.y = getDistanceY(powerBar, counter / ballFrames)
+        break;
+    }
 
-  // set ball's position to calculated points
-  const gravity = 2
-  const dz = (ballFrames * counter - 0.5 * gravity * Math.pow(counter, 2)) / ballFrames
-  ball.width = dz > 3 ? dz : 3
-  ball.position.z = dz
-  switch (state.portal) {
-    case 'a':
-      ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalA, counter / ballFrames)
-      ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalA, counter / ballFrames)
-      break;
-    case 'b':
-      ball.position.x = portalB.position.x + portalB.width - ball.position.x + getDistanceX(portalB, counter / ballFrames)
-      ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalB, counter / ballFrames)
-      break;
-    default:
-      ball.position.x = getDistanceX(powerBar, counter / ballFrames)
-      ball.position.y = getDistanceY(powerBar, counter / ballFrames)
-      break;
+    ballShadow.position.x = ball.position.x - dz
+    ballShadow.position.y = ball.position.y - dz
+    ballShadow.fillStyle = `rgba(0, 0, 0, ${0.5 - dz / 100})`
   }
-  ballShadow.position.x = ball.position.x - dz
-  ballShadow.position.y = ball.position.y - dz
-  ballShadow.fillStyle = `rgba(0, 0, 0, ${0.5 - dz / 100})`
   ballShadow.draw()
   ball.draw()
 
