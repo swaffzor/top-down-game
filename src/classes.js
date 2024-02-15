@@ -1,7 +1,7 @@
 const GRAVITY = 2
 
 class Sprite {
-  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction, width }) {
+  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction, width, onLoad }) {
     this.image = new Image()
     this.image.src = image
 
@@ -20,6 +20,7 @@ class Sprite {
       this.width = width ?? this.image.width / this.frames.max
       this.height = this.image.height
       console.log(this.image.src, `${this.width}x${this.height}`)
+      onLoad && onLoad(this.width, this.height)
     }
     this.moving = false
     this.running = false
@@ -61,6 +62,9 @@ class Sprite {
       }
     }
 
+    // context.strokeStyle = 'rgba(255, 0, 0, 0.8)'
+    // context.strokeRect(this.position.x, this.position.y, this.width, this.height,)
+
     // frame/animation management
     const animationSpeed = this.running ? 5 : 10 // lower is faster
     if (this.frames.max > 1) this.frames.elapsed++
@@ -71,7 +75,7 @@ class Sprite {
   }
 }
 
-class Boundary {
+class Collider {
   static width = 16
   static height = 16
   static isBoundary = true
@@ -82,16 +86,17 @@ class Boundary {
     fillStyle = 'rgba(255, 0, 0, 0.2)',
     strokeStyle = 'rgba(255, 0, 0, 0.8)',
     shape = 'rect',
-    render = 'fill'
+    render = 'fill',
+    visible = true
   }) {
     this.position = position
-    this.width = width || Boundary.width
-    this.height = height || Boundary.height
+    this.width = width || Collider.width
+    this.height = height || Collider.height
     this.fillStyle = fillStyle
     this.shape = shape
     this.velocity = { x: 1, y: 1, z: 0 }
     this.direction = ''
-    this.visible = true
+    this.visible = visible
     this.time = 0
     this.rotation = 0
     this.name = name
@@ -114,7 +119,7 @@ class Boundary {
           : context.strokeRect(0, -this.height, this.width * visible, this.height)
       } else if (this.shape === 'circle') {
         context.beginPath()
-        context.arc(0, -this.height, this.width * visible, 0, 2 * Math.PI)
+        context.arc(0, 0, this.width * visible, 0, 2 * Math.PI)
         this.render === 'fill'
           ? context.fill()
           : context.stroke()
