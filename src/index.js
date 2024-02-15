@@ -208,7 +208,6 @@ let drawables = [
   clubRadius,
   player,
   foreground,
-  ...boundaries
 ]
 
 let state = {
