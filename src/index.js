@@ -49,11 +49,7 @@ const hole = new Sprite({
   image: './sprites/hole.png',
   position: { x: 310, y: 225 },
   frames: { max: 1 },
-})
-
-const holeBoundary = new Collider({
-  name: 'holeBoundary',
-  position: { x: hole.position.x + 4, y: hole.position.y + 2 },
+  name: 'hole',
   width: 15,
   height: 10,
   shape: 'rect',
@@ -178,7 +174,9 @@ collisionsMap.forEach((row, y) => {
           x: x * Collider.width + initMapPos.x,
           y: y * Collider.height + initMapPos.y,
           z: boundaryHeight[cell],
-        }
+        },
+        visible: false,
+        fillStyle: 'rgba(255, 0, 0, 0.8)',
       }))
     }
   })
@@ -193,7 +191,6 @@ const movables = [
   portalA,
   portalB,
   hole,
-  holeBoundary,
   ...boundaries,
 ]
 
@@ -208,10 +205,11 @@ let drawables = [
   clubRadius,
   player,
   foreground,
+  ...boundaries
 ]
 
 let state = {
-  animationMode: 'move',
+  mode: 'move',
   par: 3,
   strokes: 0,
   portal: '',
@@ -259,10 +257,10 @@ window.addEventListener('keydown', (event) => {
       break
     case 'Enter':
       keys.enter.pressed = true
-      if (isColliding({ ...player, width: player.width + 10, height: player.height + 5 }, ball) && state.animationMode === 'move') {
+      if (isColliding({ ...player, width: player.width + 10, height: player.height + 5 }, ball) && state.mode === 'move') {
         ballTarget.visible = true
         barDirection = 'grow'
-        state.animationMode = 'rotateBar'
+        state.mode = 'rotateBar'
         if (player.direction === 'up' && powerBar.direction !== 'up') {
           powerBar.rotation = 2 * Math.PI // starting at 2PI to avoid jittering when rotating back to 0
           powerBar.direction = 'up'
@@ -281,20 +279,20 @@ window.addEventListener('keydown', (event) => {
         }
         powerBar.height = club.max
         window.requestAnimationFrame(animatePowerBar)
-      } else if (state.animationMode === 'rotateBar') {
-        state.animationMode = 'powerBar'
-      } else if (state.animationMode === 'powerBar') {
+      } else if (state.mode === 'rotateBar') {
+        state.mode = 'powerBar'
+      } else if (state.mode === 'powerBar') {
         ballFrames = MAX_BALL_FRAMES * powerBar.height / club.max
-        state.animationMode = 'move'
+        state.mode = 'move'
         state.strokes++
         window.requestAnimationFrame(animateBall)
       }
       break
     case 'Escape':
-      if (state.animationMode === 'powerBar') {
-        state.animationMode = 'rotateBar'
-      } else if (state.animationMode === 'rotateBar') {
-        state.animationMode = 'move'
+      if (state.mode === 'powerBar') {
+        state.mode = 'rotateBar'
+      } else if (state.mode === 'rotateBar') {
+        state.mode = 'move'
       }
       break
     case 't':
@@ -587,7 +585,7 @@ const isColliding = (object, collider) => {
 }
 
 const isMovePossible = (movable) => {
-  if (state.animationMode !== 'move') return false
+  if (state.mode !== 'move') return false
   for (let i = 0; i < boundaries.length; i++) {
     const boundary = boundaries[i]
     if (isColliding(movable, boundary)) {
@@ -600,7 +598,7 @@ const isMovePossible = (movable) => {
 }
 
 const makePlayerMove = (direction) => {
-  if (state.animationMode === "move") player.direction = direction
+  if (state.mode === "move") player.direction = direction
   player.image = player.sprites[direction]
 
   const axis = direction === 'up' || direction === 'down' ? 'y' : 'x'
@@ -702,12 +700,12 @@ const animate = () => {
     ballTarget.position.y = getDistanceY(powerBar)
   }
 
-  if (isColliding(ball, holeBoundary) && ball.position.z <= 2) {
+  if (isColliding(ball, hole)) {
     console.log('ball in hole')
     ball.visible = false
     ballShadow.visible = false
-    ball.position.x = holeBoundary.position.x
-    ball.position.y = holeBoundary.position.y
+    ball.position.x = hole.position.x
+    ball.position.y = hole.position.y
     document.getElementById('banner').classList.add('show')
     document.getElementById('banner').innerHTML = `${state.strokes === 1
       ? "HOLE IN ONE!!!"
@@ -818,7 +816,7 @@ const tempAnimate = () => {
 }
 
 const animatePowerBar = () => {
-  if (state.animationMode === 'powerBar') {
+  if (state.mode === 'powerBar') {
     // determine power of swing
     if (barDirection === 'grow') {
       if (powerBar.height < club.max) powerBar.height += barHeightSpeed
@@ -831,7 +829,7 @@ const animatePowerBar = () => {
     else if (powerBar.height === 0) barDirection = 'grow'
   }
 
-  if (state.animationMode === 'rotateBar') {
+  if (state.mode === 'rotateBar') {
     // console.log('rotating bar')
     powerBar.rotation += barAngleSpeed
     if (player.direction === 'down') {
@@ -875,7 +873,7 @@ const animatePowerBar = () => {
   ballTarget.position.x = getDistanceX(powerBar) //+ barDirection === 'grow' ? ball.width : -ball.width
   ballTarget.position.y = getDistanceY(powerBar) //+ barDirection === 'grow' ? ball.height : -ball.height
 
-  if (state.animationMode !== 'move') window.requestAnimationFrame(animatePowerBar)
+  if (state.mode !== 'move') window.requestAnimationFrame(animatePowerBar)
 }
 
 const animateBall = () => {
@@ -887,7 +885,7 @@ const animateBall = () => {
     console.log('portaled')
     portalB.rotation = powerBar.rotation
     state.portal = "b"
-    drawables.push(ballTarget)
+    ballTarget.visible = true
     window.requestAnimationFrame(tempAnimate)
     return
     // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB)
