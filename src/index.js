@@ -6,8 +6,8 @@ canvas.width = 900 //* 16
 canvas.height = 506 //* 9
 
 const initMapPos = { x: canvas.width / 6, y: canvas.height / 6 }
-const background = new Sprite({ image: './sprites/test-map.png', position: initMapPos, scale: 0.5 })
-const foreground = new Sprite({ image: './sprites/test-map-foreground.png', position: initMapPos, scale: 0.5 })
+const background = new Sprite({ name: 'background', image: './sprites/test-map.png', position: initMapPos, scale: 0.5 })
+const foreground = new Sprite({ name: 'foreground', image: './sprites/test-map-foreground.png', position: initMapPos, scale: 0.5 })
 
 const spriteCount = 6
 const spriteWidth = 16
@@ -30,22 +30,24 @@ const playerIdleRight = new Image();
 playerIdleRight.src = './sprites/alex/idle_right.png'
 
 const portalA = new Sprite({
+  name: 'portalA',
   image: './sprites/portal3.png',
-  position: { x: 570, y: 220 },
+  position: { x: 250, y: 350, z: 20 },
   frames: { max: 7 },
 })
 
 const portalB = new Sprite({
+  name: 'portalB',
   image: './sprites/portal3.png',
-  position: { x: 262, y: 200 },
+  position: { x: 230, y: 150, z: 20 },
   frames: { max: 7 },
 })
 
 const hole = new Sprite({
-  image: './sprites/hole.png',
-  position: { x: 310, y: 225 },
-  frames: { max: 1 },
   name: 'hole',
+  image: './sprites/hole.png',
+  position: { x: 240, y: 200, z: 0 },
+  frames: { max: 1 },
   width: 15,
   height: 10,
   shape: 'rect',
@@ -54,7 +56,7 @@ const hole = new Sprite({
 
 const ball = new Collider({
   name: 'ball',
-  position: { x: 391, y: 250, z: 0 },
+  position: { x: 379, y: 247, z: 0 },
   width: 3,
   height: 3,
   shape: 'circle',
@@ -87,7 +89,7 @@ const powerBar = new Collider({
   height: 100,
   rotation: 2 * Math.PI,
   shape: 'rect',
-  fillStyle: 'rgba(255, 0, 255, 1.5)'
+  fillStyle: 'rgba(255, 0, 255, 1)'
 })
 
 const clubRadius = new Collider({
@@ -104,6 +106,7 @@ const clubRadius = new Collider({
 
 
 const player = new Sprite({
+  name: 'player',
   image: './sprites/alex/idle_down.png',
   position: {
     x: canvas.width / 2 - 30,
@@ -135,17 +138,17 @@ let club = {
   loft: 0,
   name: '5',
   bag: {
-    1: { name: '1', max: 100, loft: 3, barHeightSpeed: 1, barAngleSpeed: 0.15 },
-    2: { name: '2', max: 90, loft: 5, barHeightSpeed: 1, barAngleSpeed: 0.14 },
-    3: { name: '3', max: 80, loft: 7, barHeightSpeed: 1.5, barAngleSpeed: 0.13 },
-    4: { name: '4', max: 70, loft: 10, barHeightSpeed: 1.5, barAngleSpeed: 0.12 },
-    5: { name: '5', max: 60, loft: 13, barHeightSpeed: 1, barAngleSpeed: 0.11 },
-    6: { name: '6', max: 50, loft: 16, barHeightSpeed: 1, barAngleSpeed: 0.10 },
-    7: { name: '7', max: 40, loft: 19, barHeightSpeed: 1.5, barAngleSpeed: 0.09 },
-    8: { name: '8', max: 30, loft: 22, barHeightSpeed: 1.5, barAngleSpeed: 0.08 },
-    9: { name: '9', max: 20, loft: 25, barHeightSpeed: 1, barAngleSpeed: 0.07 },
-    w: { name: 'w', max: 10, loft: 30, barHeightSpeed: 1.75, barAngleSpeed: 0.06 },
-    p: { name: 'p', max: 35, loft: 0, barHeightSpeed: 1.5, barAngleSpeed: 0.13 },
+    1: { name: '1', max: 100, loft: 3, barHeightSpeed: 1, barAngleSpeed: 0.15 / 10 },
+    2: { name: '2', max: 90, loft: 5, barHeightSpeed: 1, barAngleSpeed: 0.14 / 10 },
+    3: { name: '3', max: 80, loft: 7, barHeightSpeed: 1.5, barAngleSpeed: 0.13 / 10 },
+    4: { name: '4', max: 70, loft: 10, barHeightSpeed: 1.5, barAngleSpeed: 0.12 / 10 },
+    5: { name: '5', max: 60, loft: 13, barHeightSpeed: 1, barAngleSpeed: 0.11 / 10 },
+    6: { name: '6', max: 50, loft: 16, barHeightSpeed: 1, barAngleSpeed: 0.10 / 10 },
+    7: { name: '7', max: 40, loft: 19, barHeightSpeed: 1.5, barAngleSpeed: 0.09 / 10 },
+    8: { name: '8', max: 30, loft: 22, barHeightSpeed: 1.5, barAngleSpeed: 0.08 / 10 },
+    9: { name: '9', max: 20, loft: 25, barHeightSpeed: 1, barAngleSpeed: 0.07 / 10 },
+    w: { name: 'w', max: 10, loft: 30, barHeightSpeed: 1.75, barAngleSpeed: 0.06 / 10 },
+    p: { name: 'p', max: 35, loft: 0, barHeightSpeed: 1.5, barAngleSpeed: 0.13 / 10 },
   }
 }
 club = { ...club.bag[club.name], bag: { ...club.bag } }
@@ -168,12 +171,15 @@ collisionsMap.forEach((row, y) => {
       boundaries.push(new Collider({
         position: {
           x: x * Collider.width + initMapPos.x,
-          y: y * Collider.height + initMapPos.y,
+          y: y * Collider.height + initMapPos.y - 10,
           z: boundaryHeight[cell],
         },
-        visible: true,
-        fillStyle: 'rgba(255, 255, 255, 0.0025)',
-        strokeStyle: 'rgba(255, 0, 0, 0.0050)',
+        visible: false,
+        shape: 'rect',
+        rotation: null,
+        fillStyle: 'rgba(255, 123, 0, 0.33)',
+        strokeStyle: 'rgba(255, 255, 255, 1)',
+        name: `boundary-${x}-${y}`,
       }))
     }
   })
@@ -224,6 +230,7 @@ let state = {
   par: 3,
   strokes: 0,
   portal: '',
+  delta: { ...ball.position },
 }
 
 
@@ -245,8 +252,17 @@ animate()
 canvas.addEventListener('click', (event) => {
   var x = event.offsetX
   var y = event.offsetY
-  console.log(`x: ${x} y: ${y}`);
+  console.log(`x: ${x}, y: ${y}`);
   debugBall.position = { x, y, z: 0 }
   debugBall.visible = true
-  // debugBall.draw()
+
+  const drawable = drawables.find(drawable => drawable.name !== debugBall.name && drawable?.name?.includes('boundary-') && isColliding(debugBall, drawable))
+  const boundary = boundaries.find(boundary => isColliding(debugBall, boundary))
+  if (boundary && boundary.name !== drawable.name) {
+    console.log('boundary', boundary)
+    boundary.fillStyle = 'rgba(255, 255, 255, 1)'
+  }
+  if (drawable) {
+    console.log('drawable', drawable)
+  }
 }, false);

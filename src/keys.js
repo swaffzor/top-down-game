@@ -20,10 +20,12 @@ window.addEventListener('keydown', (event) => {
     case 'j':
       keys.j.pressed = true
       player.jumping = 1
+      lastKey = 'j'
       break;
     case 'k':
       keys.k.pressed = true
       player.running = true
+      lastKey = 'k'
       break
     case 'Enter':
       keys.enter.pressed = true
@@ -55,10 +57,12 @@ window.addEventListener('keydown', (event) => {
         state.mode = 'powerBar'
       } else if (state.mode === 'powerBar') {
         ballFrames = MAX_BALL_FRAMES * powerBar.height / club.max
-        state.mode = 'move'
         state.strokes++
+        setMoveEverything()
+        state.mode = 'move'
         window.requestAnimationFrame(animateBall)
       }
+      lastKey = 'Enter'
       break
     case 'Escape':
       if (state.mode === 'powerBar') {
@@ -66,43 +70,53 @@ window.addEventListener('keydown', (event) => {
       } else if (state.mode === 'rotateBar') {
         state.mode = 'move'
       }
+      lastKey = 'Escape'
       break
     case 't':
       keys.t.pressed = true
+      lastKey = 't'
       break
     case 'g':
       keys.g.pressed = true
+      lastKey = 'g'
       break
     case 'f':
       keys.f.pressed = true
+      lastKey = 'f'
       break
     case 'h':
       keys.h.pressed = true
+      lastKey = 'h'
       break
     case 'q':
       timeOutValue && clearTimeout(timeOutValue)
       ballTarget.visible = true
       keys.q.pressed = true
+      lastKey = 'q'
       break
     case 'e':
       timeOutValue && clearTimeout(timeOutValue)
       ballTarget.visible = true
       keys.e.pressed = true
+      lastKey = 'e'
       break
     case 'u':
       timeOutValue && clearTimeout(timeOutValue)
       ballTarget.visible = true
       keys.u.pressed = true
+      lastKey = 'u'
       break
     case 'i':
       timeOutValue && clearTimeout(timeOutValue)
       ballTarget.visible = true
       keys.i.pressed = true
+      lastKey = 'i'
       break
     case 'o':
       counter = 0
       window.requestAnimationFrame(animateBall)
       keys.o.pressed = true
+      lastKey = 'o'
       break
     case 'n':
       // club selection
@@ -121,6 +135,7 @@ window.addEventListener('keydown', (event) => {
       clubRadius.visible = true
       clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
       clubRadius.width = club.max
+      lastKey = 'n'
       break
     case 'm':
       // club selection
@@ -139,6 +154,7 @@ window.addEventListener('keydown', (event) => {
       clubRadius.visible = true
       clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
       clubRadius.width = club.max
+      lastKey = 'm'
       break
     case 'p':
       keys.p.pressed = true

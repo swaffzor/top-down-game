@@ -1,7 +1,8 @@
 const GRAVITY = 2
 
 class Sprite {
-  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction, width, onLoad, scale = 1 }) {
+  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction, width, name, onLoad, scale = 1 }) {
+    this.name = name
     this.image = new Image()
     this.image.src = image
 
@@ -112,7 +113,7 @@ class Collider {
     context.fillStyle = this.fillStyle
     context.strokeStyle = this.strokeStyle
 
-    if (this.rotation >= 0) {
+    if (this.rotation > 0) {
       context.save();
       context.translate(this.position.x, this.position.y);
       context.rotate(this.rotation);
@@ -141,15 +142,20 @@ class Collider {
     }
     // draw a border around the boundary
     // context.strokeStyle = 'rgba(255, 0, 0, 0.5)'
-    // context.fillStyle = this.position.z > 0 ? 'rgba(0, 255, 255, 0.5)' : 'rgba(255, 0, 0, 0.2)'
+    // context.fillStyle = this.position.z > 0 ? 'rgba(0, 255, 255, 0.9)' : 'rgba(0, 0, 255, 0.9)'
+    // if (!this.visible) return
     // if (this.shape === 'circle') {
     //   context.strokeStyle = this.strokeStyle
     //   context.beginPath()
     //   context.arc(this.position.x, this.position.y, this.width, 0, 2 * Math.PI)
+    //   context.strokeStyle = this.strokeStyle
     //   context.stroke()
-    // }
-    // else {
+    //   context.fillStyle = this.fillStyle
+    //   context.fill()
+    // } else {
+    //   context.fillStyle = this.fillStyle
     //   context.fillRect(this.position.x, this.position.y, this.width, this.height)
+    //   context.strokeStyle = this.strokeStyle
     //   context.strokeRect(this.position.x, this.position.y, this.width, this.height)
     // }
 

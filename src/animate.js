@@ -36,12 +36,12 @@ const animate = () => {
   }
   // laser pointer controls
   if (keys.q.pressed) {
-    powerBar.rotation += barAngleSpeed
+    powerBar.rotation += .05
     ballTarget.position.x = getDistanceX(powerBar)
     ballTarget.position.y = getDistanceY(powerBar)
   }
   if (keys.e.pressed) {
-    powerBar.rotation -= barAngleSpeed
+    powerBar.rotation -= .05
     ballTarget.position.x = getDistanceX(powerBar)
     ballTarget.position.y = getDistanceY(powerBar)
   }
@@ -56,25 +56,25 @@ const animate = () => {
     ballTarget.position.y = getDistanceY(powerBar)
   }
   // move "camera"
-  if (keys.p.pressed && state.mode === 'camera') {
+  if (keys.p.pressed) {
     setMoveEverything()
     movables.forEach(movable => {
       movable.position.y += 1 * movable.scale
     })
   }
-  if (keys.l.pressed && state.mode === 'camera') {
+  if (keys.l.pressed) {
     setMoveEverything()
     movables.forEach(movable => {
       movable.position.x += 1 * movable.scale
     })
   }
-  if (keys.semicolon.pressed && state.mode === 'camera') {
+  if (keys.semicolon.pressed) {
     setMoveEverything()
     movables.forEach(movable => {
       movable.position.y -= 1 * movable.scale
     })
   }
-  if (keys.apostrophe.pressed && state.mode === 'camera') {
+  if (keys.apostrophe.pressed) {
     setMoveEverything()
     movables.forEach(movable => {
       movable.position.x -= 1 * movable.scale
@@ -262,11 +262,7 @@ const animatePowerBar = () => {
 }
 
 const animateBall = () => {
-  // ballTarget.width = ball.width
-  // ballTarget.position.x = getDistanceX(powerBar, counter / ballFrames) + .01
-  // ballTarget.position.y = getDistanceY(powerBar, counter / ballFrames) + .01
-
-  if (state.portal === "" && isColliding(ball, portalA)) {
+  if (state.portal !== "a" && isColliding(ball, portalA)) {
     console.log('portaled')
     portalB.rotation = powerBar.rotation
     state.portal = "b"
@@ -275,7 +271,7 @@ const animateBall = () => {
     return
     // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB)
     // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB)
-  } else if (state.portal === "" && isColliding(ball, portalB)) {
+  } else if (state.portal !== "b" && isColliding(ball, portalB)) {
     console.log('portaled')
     portalA.rotation = powerBar.rotation
     state.portal = 'a'
@@ -317,20 +313,24 @@ const animateBall = () => {
       case '':
       default:
         if (isMovePossible({ ...ball, position: { x: ball.position.x + 1, y: ball.position.y + 1, z: ball.position.z } })) {
-          ball.position.x = getDistanceX(powerBar, counter / ballFrames)
-          ball.position.y = getDistanceY(powerBar, counter / ballFrames)
-          // colliders need a z value to determine if ball is over them
+          const dx = getDistanceX(powerBar, counter / ballFrames)
+          const dy = getDistanceY(powerBar, counter / ballFrames)
+          state.delta = { x: ball.position.x - dx, y: ball.position.y - dy }
+          ball.position.x = dx
+          ball.position.y = dy
         } else {
-          const boundary = boundaries.find(boundary => isColliding(boundary, ball))
-          boundary.visible = true
-          // ball.position.x = getDistanceX({ ...boundary, height: powerBar.height, rotation: powerBar.rotation - 1 * Math.PI / 2 }, counter / ballFrames)
-          // ball.position.y = getDistanceY({ ...boundary, height: powerBar.height, rotation: powerBar.rotation - 1 * Math.PI / 2 }, counter / ballFrames)
+
         }
     }
 
   }
   ballShadow.draw()
   ball.draw()
+
+  movables.forEach(movable => {
+    movable.position.x += state.delta.x * movable.scale
+    movable.position.y += state.delta.y * movable.scale
+  })
 
   if (counter < ballFrames) {
     counter++
@@ -339,15 +339,17 @@ const animateBall = () => {
     counter = MAX_BALL_FRAMES - MAX_BALL_FRAMES
     state.portal = ""
     ballTarget.visible = false
+    movables = [player, powerBar, clubRadius]
   }
 }
 
 const getDistanceX = (boundary, percent = 1) => boundary.position.x + Math.cos(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.width / 4
 const getDistanceY = (boundary, percent = 1) => boundary.position.y + Math.sin(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.height / 4
 
-const setMoveEverything = () => {
+const setMoveEverything = (exceptions = []) => {
   console.log('moving everything')
   movables = [
+    ballTarget,
     ballShadow,
     ball,
     portalA,
@@ -359,12 +361,12 @@ const setMoveEverything = () => {
     clubRadius,
     ...boundaries,
     ...grounds,
-  ]
+  ].filter(movable => !exceptions.includes(movable))
 }
 
 const debugDraw = () => {
   boundaries.forEach(boundary => {
-    context.fillStyle = 'rgba(255, 0, 0, 0.2)'
+    context.fillStyle = 'rgba(0, 0, 255, 0.5)'
     context.fillRect(boundary.position.x, boundary.position.y, boundary.width, boundary.height)
   })
 

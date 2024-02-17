@@ -1,28 +1,24 @@
 const isColliding = (object, collider) => {
   if (object.shape === 'circle' && collider.shape === 'circle') {
+    console.log('circle colliding circle')
     const dx = object.position.x - collider.position.x
     const dy = object.position.y - collider.position.y
     const distance = Math.sqrt(dx * dx + dy * dy)
     return distance < object.width + collider.width
   }
 
-  if (object.shape === 'circle' && collider.shape === 'rect') {
-    // return true if object is intersecting more than 50% of it's size
-    const objectWidth = object.width / 2
-    const objectHeight = object.height / 4
-    const colliderWidth = collider.width
-    const colliderHeight = collider.height
-    return object.position.x + objectWidth > collider.position.x &&
-      object.position.x < collider.position.x + colliderWidth &&
-      object.position.y + objectHeight > collider.position.y &&
-      object.position.y < collider.position.y + colliderHeight &&
-      object.position.z < collider.position.z
-  }
-
-  return object.position.x + object.width > collider.position.x &&
-    object.position.x < collider.position.x + collider.width &&
-    object.position.y + object.height > collider.position.y &&
-    object.position.y < collider.position.y + collider.height
+  // return true if object is intersecting more than 50% of it's size
+  const objectWidth = object.width / 2
+  const objectHeight = object.height / 2
+  const colliderWidth = collider.width
+  const colliderHeight = collider.height
+  const result = object.position.x + objectWidth > collider.position.x &&
+    object.position.x < collider.position.x + colliderWidth &&
+    object.position.y + objectHeight > collider.position.y &&
+    object.position.y < collider.position.y + colliderHeight
+    && object.position.z <= collider.position.z
+  result && console.log(`${object.name} colliding ${collider.name}`)
+  return result
 }
 
 const isMovePossible = (movable) => {
@@ -30,7 +26,6 @@ const isMovePossible = (movable) => {
   for (let i = 0; i < boundaries.length; i++) {
     const boundary = boundaries[i]
     if (isColliding(movable, boundary)) {
-      console.log('colliding')
       moving = false
       return false
     }
