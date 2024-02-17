@@ -1,7 +1,7 @@
 const GRAVITY = 2
 
 class Sprite {
-  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction, width, onLoad }) {
+  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction, width, onLoad, scale = 1 }) {
     this.image = new Image()
     this.image.src = image
 
@@ -27,6 +27,7 @@ class Sprite {
     this.jumping = 0
     this.visible = true
     this.shape = 'rect'
+    this.scale = scale
   }
 
   draw() {
@@ -87,7 +88,8 @@ class Collider {
     strokeStyle = 'rgba(255, 0, 0, 0.8)',
     shape = 'rect',
     render = 'fill',
-    visible = true
+    visible = true,
+    scale = 1,
   }) {
     this.position = position
     this.width = width || Collider.width
@@ -102,6 +104,7 @@ class Collider {
     this.name = name
     this.render = render
     this.strokeStyle = strokeStyle
+    this.scale = scale
   }
 
   draw() {
@@ -137,10 +140,18 @@ class Collider {
         : context.stroke()
     }
     // draw a border around the boundary
-    // context.strokeStyle = 'rgba(255, 0, 0, 0.8)'
-    // if (this.shape === 'circle') context.stroke()
-    // context.strokeRect(this.position.x, this.position.y, this.width * 2, this.height * 2)
-    // else
-    //   context.strokeRect(this.position.x, this.position.y, this.width, this.height,)
+    // context.strokeStyle = 'rgba(255, 0, 0, 0.5)'
+    // context.fillStyle = this.position.z > 0 ? 'rgba(0, 255, 255, 0.5)' : 'rgba(255, 0, 0, 0.2)'
+    // if (this.shape === 'circle') {
+    //   context.strokeStyle = this.strokeStyle
+    //   context.beginPath()
+    //   context.arc(this.position.x, this.position.y, this.width, 0, 2 * Math.PI)
+    //   context.stroke()
+    // }
+    // else {
+    //   context.fillRect(this.position.x, this.position.y, this.width, this.height)
+    //   context.strokeRect(this.position.x, this.position.y, this.width, this.height)
+    // }
+
   }
 }

@@ -5,13 +5,9 @@ const context = canvas.getContext("2d");
 canvas.width = 900 //* 16
 canvas.height = 506 //* 9
 
-if (window.innerHeight < window.innerWidth) {
-  document.getElementById('dpad').style.display = 'none'
-}
-
-const initMapPos = { x: canvas.width / 4, y: canvas.height / 4 }
-const background = new Sprite({ image: './sprites/test-map.png', position: initMapPos })
-const foreground = new Sprite({ image: './sprites/test-map-foreground.png', position: initMapPos })
+const initMapPos = { x: canvas.width / 6, y: canvas.height / 6 }
+const background = new Sprite({ image: './sprites/test-map.png', position: initMapPos, scale: 0.5 })
+const foreground = new Sprite({ image: './sprites/test-map-foreground.png', position: initMapPos, scale: 0.5 })
 
 const spriteCount = 6
 const spriteWidth = 16
@@ -58,7 +54,7 @@ const hole = new Sprite({
 
 const ball = new Collider({
   name: 'ball',
-  position: { x: 500, y: 250, z: 0 },
+  position: { x: 391, y: 250, z: 0 },
   width: 3,
   height: 3,
   shape: 'circle',
@@ -110,8 +106,8 @@ const clubRadius = new Collider({
 const player = new Sprite({
   image: './sprites/alex/idle_down.png',
   position: {
-    x: 485,//canvas.width / 2 - 32 / 2,
-    y: 232,//canvas.height / 2 - 32 / 2,
+    x: canvas.width / 2 - 30,
+    y: canvas.height / 2 - 30,
     z: 0,
   },
   direction: 'down',
@@ -139,17 +135,17 @@ let club = {
   loft: 0,
   name: '5',
   bag: {
-    1: { name: '1', max: 100, loft: 3 },
-    2: { name: '2', max: 90, loft: 5 },
-    3: { name: '3', max: 80, loft: 7 },
-    4: { name: '4', max: 70, loft: 10 },
-    5: { name: '5', max: 60, loft: 13 },
-    6: { name: '6', max: 50, loft: 16 },
-    7: { name: '7', max: 40, loft: 19 },
-    8: { name: '8', max: 30, loft: 22 },
-    9: { name: '9', max: 20, loft: 25 },
-    w: { name: 'w', max: 10, loft: 30 },
-    p: { name: 'p', max: 35, loft: 0 },
+    1: { name: '1', max: 100, loft: 3, barHeightSpeed: 1, barAngleSpeed: 0.15 },
+    2: { name: '2', max: 90, loft: 5, barHeightSpeed: 1, barAngleSpeed: 0.14 },
+    3: { name: '3', max: 80, loft: 7, barHeightSpeed: 1.5, barAngleSpeed: 0.13 },
+    4: { name: '4', max: 70, loft: 10, barHeightSpeed: 1.5, barAngleSpeed: 0.12 },
+    5: { name: '5', max: 60, loft: 13, barHeightSpeed: 1, barAngleSpeed: 0.11 },
+    6: { name: '6', max: 50, loft: 16, barHeightSpeed: 1, barAngleSpeed: 0.10 },
+    7: { name: '7', max: 40, loft: 19, barHeightSpeed: 1.5, barAngleSpeed: 0.09 },
+    8: { name: '8', max: 30, loft: 22, barHeightSpeed: 1.5, barAngleSpeed: 0.08 },
+    9: { name: '9', max: 20, loft: 25, barHeightSpeed: 1, barAngleSpeed: 0.07 },
+    w: { name: 'w', max: 10, loft: 30, barHeightSpeed: 1.75, barAngleSpeed: 0.06 },
+    p: { name: 'p', max: 35, loft: 0, barHeightSpeed: 1.5, barAngleSpeed: 0.13 },
   }
 }
 club = { ...club.bag[club.name], bag: { ...club.bag } }
@@ -175,23 +171,37 @@ collisionsMap.forEach((row, y) => {
           y: y * Collider.height + initMapPos.y,
           z: boundaryHeight[cell],
         },
-        visible: false,
-        fillStyle: 'rgba(255, 0, 0, 0.8)',
+        visible: true,
+        fillStyle: 'rgba(255, 255, 255, 0.0025)',
+        strokeStyle: 'rgba(255, 0, 0, 0.0050)',
       }))
     }
   })
 })
 
+const debugBall = new Collider({
+  name: 'debugBall',
+  position: { x: 0, y: 0, z: 0 },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  visible: false,
+  fillStyle: 'rgba(255, 255, 0, 0.8)',
+})
 
 const grounds = [background, foreground]
 
-const movables = [
-  ballShadow,
-  ball,
-  portalA,
-  portalB,
-  hole,
-  ...boundaries,
+let movables = [
+  // ballShadow,
+  // ball,
+  // portalA,
+  // portalB,
+  // hole,
+  // debugBall,
+  // ...boundaries,
+  powerBar,
+  clubRadius,
+  player,
 ]
 
 let drawables = [
@@ -205,7 +215,8 @@ let drawables = [
   clubRadius,
   player,
   foreground,
-  ...boundaries
+  debugBall,
+  ...boundaries,
 ]
 
 let state = {
@@ -218,10 +229,10 @@ let state = {
 
 const STEP = 1
 const RUN = 2
-const OFFSET = 3
+const OFFSET = 0
 const MAX_BALL_FRAMES = 100
 let barDirection = ''
-let barHeightSpeed = 3
+let barHeightSpeed = 2
 let barAngleSpeed = 0.05
 let ballFrames = MAX_BALL_FRAMES
 let counter = 0
@@ -229,745 +240,13 @@ let ballHasPortaled = false
 let timeOutValue = 0
 let radiusTimeout = 0
 
-window.addEventListener('keydown', (event) => {
-  switch (event.key) {
-    case 's':
-      keys.s.pressed = true
-      lastKey = 's'
-      break;
-    case 'w':
-      keys.w.pressed = true
-      lastKey = 'w'
-      break;
-    case 'a':
-      keys.a.pressed = true
-      lastKey = 'a'
-      break;
-    case 'd':
-      keys.d.pressed = true
-      lastKey = 'd'
-      break;
-    case 'j':
-      keys.j.pressed = true
-      player.jumping = 1
-      break;
-    case 'k':
-      keys.k.pressed = true
-      player.running = true
-      break
-    case 'Enter':
-      keys.enter.pressed = true
-      if (isColliding({ ...player, width: player.width + 10, height: player.height + 5 }, ball) && state.mode === 'move') {
-        ballTarget.visible = true
-        barDirection = 'grow'
-        state.mode = 'rotateBar'
-        if (player.direction === 'up' && powerBar.direction !== 'up') {
-          powerBar.rotation = 2 * Math.PI // starting at 2PI to avoid jittering when rotating back to 0
-          powerBar.direction = 'up'
-        }
-        if (player.direction === 'right' && powerBar.direction !== 'right') {
-          powerBar.rotation = 2 * Math.PI + Math.PI / 2
-          powerBar.direction = 'right'
-        }
-        if (player.direction === 'down' && powerBar.direction !== 'down') {
-          powerBar.rotation = 2 * Math.PI + Math.PI
-          powerBar.direction = 'down'
-        }
-        if (player.direction === 'left' && powerBar.direction !== 'left') {
-          powerBar.rotation = 2 * Math.PI + 3 * Math.PI / 2
-          powerBar.direction = 'left'
-        }
-        powerBar.height = club.max
-        window.requestAnimationFrame(animatePowerBar)
-      } else if (state.mode === 'rotateBar') {
-        state.mode = 'powerBar'
-      } else if (state.mode === 'powerBar') {
-        ballFrames = MAX_BALL_FRAMES * powerBar.height / club.max
-        state.mode = 'move'
-        state.strokes++
-        window.requestAnimationFrame(animateBall)
-      }
-      break
-    case 'Escape':
-      if (state.mode === 'powerBar') {
-        state.mode = 'rotateBar'
-      } else if (state.mode === 'rotateBar') {
-        state.mode = 'move'
-      }
-      break
-    case 't':
-      keys.t.pressed = true
-      break
-    case 'g':
-      keys.g.pressed = true
-      break
-    case 'f':
-      keys.f.pressed = true
-      break
-    case 'h':
-      keys.h.pressed = true
-      break
-    case 'q':
-      timeOutValue && clearTimeout(timeOutValue)
-      ballTarget.visible = true
-      keys.q.pressed = true
-      break
-    case 'e':
-      timeOutValue && clearTimeout(timeOutValue)
-      ballTarget.visible = true
-      keys.e.pressed = true
-      break
-    case 'u':
-      timeOutValue && clearTimeout(timeOutValue)
-      ballTarget.visible = true
-      keys.u.pressed = true
-      break
-    case 'i':
-      timeOutValue && clearTimeout(timeOutValue)
-      ballTarget.visible = true
-      keys.i.pressed = true
-      break
-    case 'o':
-      counter = 0
-      window.requestAnimationFrame(animateBall)
-      keys.o.pressed = true
-      break
-    case 'n':
-      // club selection
-      keys.n.pressed = true
-      if (club.name === '1') club.name = '1'
-      else if (club.name === 'w') club.name = '9'
-      else if (club.name === 'p') club.name = 'w'
-      else club.name = (parseInt(club.name) - 1).toString()
-      club = { ...club.bag[club.name], bag: { ...club.bag }, max: club.bag[club.name].max }
-      powerBar.height = club.max
-
-      // range radius
-      radiusTimeout && clearTimeout(radiusTimeout)
-      clubRadius.visible = true
-      clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
-      clubRadius.width = club.max
-      break
-    case 'm':
-      // club selection
-      keys.m.pressed = true
-      if (club.name === 'p') club.name = 'p'
-      else if (club.name === 'w') club.name = 'p'
-      else if (club.name === '9') club.name = 'w'
-      else club.name = (parseInt(club.name) + 1).toString()
-      club = { ...club.bag[club.name], bag: { ...club.bag }, max: club.bag[club.name].max }
-      if (powerBar.height > club.max) powerBar.height = club.max
-
-      // range radius
-      radiusTimeout && clearTimeout(radiusTimeout)
-      clubRadius.visible = true
-      clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
-      clubRadius.width = club.max
-      break
-
-    default:
-      break;
-  }
-})
-
-const eraseClubRadius = () => {
-  radiusTimeout = setTimeout(() => {
-    clubRadius.visible = false
-    console.log('removed clubRadius')
-  }, 3000)
-}
-
-const eraseBallTarget = () => {
-  timeOutValue = setTimeout(() => {
-    ballTarget.visible = false
-    console.log('removed ballTarget')
-  }, 3000)
-}
-
-window.addEventListener('keyup', (event) => {
-  switch (event.key) {
-    case 's':
-      keys.s.pressed = false
-      player.moving = false
-      break;
-    case 'w':
-      keys.w.pressed = false
-      player.moving = false
-      break;
-    case 'a':
-      keys.a.pressed = false
-      player.moving = false
-      break;
-    case 'd':
-      keys.d.pressed = false
-      player.moving = false
-      break;
-    case 'j':
-      keys.j.pressed = false
-      player.moving = false
-      break;
-    case 'k':
-      keys.k.pressed = false
-      player.running = false
-      break
-    case 'Enter':
-      keys.enter.pressed = false
-      break
-    case 't':
-      keys.t.pressed = false
-      break
-    case 'g':
-      keys.g.pressed = false
-      break
-    case 'f':
-      keys.f.pressed = false
-      break
-    case 'h':
-      keys.h.pressed = false
-      break
-    case 'q':
-      keys.q.pressed = false
-      eraseBallTarget()
-      break
-    case 'e':
-      keys.e.pressed = false
-      eraseBallTarget()
-      break
-    case 'u':
-      keys.u.pressed = false
-      eraseBallTarget()
-      break
-    case 'i':
-      keys.i.pressed = false
-      eraseBallTarget()
-      break
-    case 'o':
-      keys.o.pressed = false
-      break
-    case 'n':
-      keys.n.pressed = false
-      eraseClubRadius()
-      break
-    case 'm':
-      keys.m.pressed = false
-      eraseClubRadius()
-      break
-
-    default:
-      break;
-  }
-})
-
-const move = (direction) => {
-  switch (direction) {
-    case "up":
-      keys.w.pressed = true
-      lastKey = 'w'
-      break;
-    case "down":
-      keys.s.pressed = true
-      lastKey = 's'
-      break;
-    case "left":
-      keys.a.pressed = true
-      lastKey = 'a'
-      break;
-    case "right":
-      keys.d.pressed = true
-      lastKey = 'd'
-      break;
-  }
-}
-
-const stopMoving = () => {
-  keys.w.pressed = false
-  keys.s.pressed = false
-  keys.a.pressed = false
-  keys.d.pressed = false
-}
-
-const buttonUp = document.getElementById('button-up')
-const buttonDown = document.getElementById('button-down')
-const buttonLeft = document.getElementById('button-left')
-const buttonRight = document.getElementById('button-right')
-buttonUp.addEventListener('touchstart', () => move('up'))
-buttonUp.addEventListener('touchend', stopMoving)
-buttonDown.addEventListener('touchstart', () => move('down'))
-buttonDown.addEventListener('touchend', stopMoving)
-buttonLeft.addEventListener('touchstart', () => move('left'))
-buttonLeft.addEventListener('touchend', stopMoving)
-buttonRight.addEventListener('touchstart', () => move('right'))
-buttonRight.addEventListener('touchend', stopMoving)
-
-const keys = {
-  w: {
-    pressed: false,
-  },
-  a: {
-    pressed: false,
-  },
-  s: {
-    pressed: false,
-  },
-  d: {
-    pressed: false,
-  },
-  j: {
-    pressed: false,
-  },
-  k: {
-    pressed: false,
-  },
-  enter: {
-    pressed: false,
-  },
-  t: {
-    pressed: false,
-  },
-  g: {
-    pressed: false,
-  },
-  h: {
-    pressed: false,
-  },
-  f: {
-    pressed: false,
-  },
-  q: {
-    pressed: false,
-  },
-  e: {
-    pressed: false,
-  },
-  u: {
-    pressed: false,
-  },
-  i: {
-    pressed: false,
-  },
-  o: {
-    pressed: false,
-  },
-  n: {
-    pressed: false,
-  },
-  m: {
-    pressed: false,
-  },
-}
-let lastKey = ''
-
-const isColliding = (object, collider) => {
-  if (object.shape === 'circle' && collider.shape === 'circle') {
-    const dx = object.position.x - collider.position.x
-    const dy = object.position.y - collider.position.y
-    const distance = Math.sqrt(dx * dx + dy * dy)
-    return distance < object.width + collider.width
-  }
-
-  if (object.shape === 'circle' && collider.shape === 'rect') {
-    // return true if object is intersecting more than 50% of it's size
-    const objectWidth = object.width / 2
-    const objectHeight = object.height / 4
-    const colliderWidth = collider.width
-    const colliderHeight = collider.height
-    return object.position.x + objectWidth > collider.position.x &&
-      object.position.x < collider.position.x + colliderWidth &&
-      object.position.y + objectHeight > collider.position.y &&
-      object.position.y < collider.position.y + colliderHeight &&
-      object.position.z < collider.position.z
-  }
-
-  return object.position.x + object.width > collider.position.x &&
-    object.position.x < collider.position.x + collider.width &&
-    object.position.y + object.height > collider.position.y &&
-    object.position.y < collider.position.y + collider.height
-}
-
-const isMovePossible = (movable) => {
-  if (state.mode !== 'move') return false
-  for (let i = 0; i < boundaries.length; i++) {
-    const boundary = boundaries[i]
-    if (isColliding(movable, boundary)) {
-      console.log('colliding')
-      moving = false
-      return false
-    }
-  }
-  return true
-}
-
-const makePlayerMove = (direction) => {
-  if (state.mode === "move") player.direction = direction
-  player.image = player.sprites[direction]
-
-  const axis = direction === 'up' || direction === 'down' ? 'y' : 'x'
-  const polarity = direction === 'up' || direction === 'left' ? 1 : -1
-
-  const movingDistance = polarity * (player.running ? RUN : STEP)
-  const movingOffset = -1 * polarity * (player.running ? OFFSET * RUN : OFFSET)
-  const tempPlayer = { ...player, position: { ...player.position, [axis]: player.position[axis] + movingDistance + movingOffset } }
-
-  if (isMovePossible(tempPlayer)) {
-    player.moving = true
-    grounds.forEach(movable => {
-      movable.position[axis] += movingDistance
-    })
-    movables.forEach(boundary => {
-      boundary.position[axis] += 2 * movingDistance
-    })
-  }
-}
-
-const debugDraw = () => {
-  boundaries.forEach(boundary => {
-    context.fillStyle = 'rgba(255, 0, 0, 0.2)'
-    context.fillRect(boundary.position.x, boundary.position.y, boundary.width, boundary.height)
-  })
-
-  // give the player 1 pixel wide stripes as a measure of distance
-  context.fillStyle = 'rgba(0, 0, 255, 0.2)'
-  context.fillRect(player.position.x, player.position.y, player.width, player.height)
-  context.fillStyle = 'rgba(0, 255, 0, 0.2)'
-  context.fillRect(player.position.x, player.position.y, 1, player.height)
-  context.fillStyle = 'rgba(0, 0, 255, 0.2)'
-  context.fillRect(player.position.x + 1, player.position.y, 1, player.height)
-  context.fillStyle = 'rgba(0, 255, 0, 0.2)'
-  context.fillRect(player.position.x + 2, player.position.y, 1, player.height)
-  context.fillStyle = 'rgba(0, 0, 255, 0.2)'
-  context.fillRect(player.position.x + 3, player.position.y, 1, player.height)
-  context.fillStyle = 'rgba(0, 255, 0, 0.2)'
-  context.fillRect(player.position.x + 4, player.position.y, 1, player.height)
-  context.fillStyle = 'rgba(0, 0, 255, 0.2)'
-  context.fillRect(player.position.x + 5, player.position.y, 1, player.height)
-}
-
-const draw = () => {
-  context.fillStyle = "#0099cc" // ocean blue
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  drawables.forEach(drawable => drawable.draw())
-
-  // debugDraw()
-}
-
-const animate = () => {
-  draw()
-
-  if (keys.w.pressed && lastKey === 'w') {
-    makePlayerMove('up')
-  }
-  if (keys.s.pressed && lastKey === 's') {
-    makePlayerMove('down')
-  }
-  if (keys.a.pressed && lastKey === 'a') {
-    makePlayerMove('left')
-  }
-  if (keys.d.pressed && lastKey === 'd') {
-    makePlayerMove('right')
-  }
-
-  if (keys.t.pressed) {
-    ball.position.y -= keys.k.pressed ? 2 : 1
-  }
-  if (keys.g.pressed) {
-    ball.position.y += keys.k.pressed ? 2 : 1
-  }
-  if (keys.f.pressed) {
-    ball.position.x -= keys.k.pressed ? 2 : 1
-  }
-  if (keys.h.pressed) {
-    ball.position.x += keys.k.pressed ? 2 : 1
-  }
-  // laser pointer controls
-  if (keys.q.pressed) {
-    powerBar.rotation += barAngleSpeed
-    ballTarget.position.x = getDistanceX(powerBar)
-    ballTarget.position.y = getDistanceY(powerBar)
-  }
-  if (keys.e.pressed) {
-    powerBar.rotation -= barAngleSpeed
-    ballTarget.position.x = getDistanceX(powerBar)
-    ballTarget.position.y = getDistanceY(powerBar)
-  }
-  if (keys.u.pressed) {
-    if (powerBar.height < club.max) powerBar.height += barHeightSpeed
-    ballTarget.position.x = getDistanceX(powerBar)
-    ballTarget.position.y = getDistanceY(powerBar)
-  }
-  if (keys.i.pressed) {
-    if (powerBar.height > 0) powerBar.height -= barHeightSpeed
-    ballTarget.position.x = getDistanceX(powerBar)
-    ballTarget.position.y = getDistanceY(powerBar)
-  }
-
-  if (isColliding(ball, hole)) {
-    console.log('ball in hole')
-    ball.visible = false
-    ballShadow.visible = false
-    ball.position.x = hole.position.x
-    ball.position.y = hole.position.y
-    document.getElementById('banner').classList.add('show')
-    document.getElementById('banner').innerHTML = `${state.strokes === 1
-      ? "HOLE IN ONE!!!"
-      : state.par - state.strokes === 0
-        ? 'Par!'
-        : state.par - state.strokes === 1
-          ? 'Birdie!'
-          : state.par - state.strokes === 2
-            ? 'Eagle!'
-            : state.par - state.strokes === 3
-              ? 'Albatross!'
-              : `${(state.par < state.strokes ? '+' : '')} ${(state.strokes - state.par)}`
-      }`
-  } else {
-    // ball.visible = true // todo: all ball to bounce out of hole if the physics are right
-  }
-
-  if (!player.moving && !player.jumping) {
-    switch (player.direction) {
-      case "up":
-        player.image = player.sprites.idleUp
-        break;
-      case "down":
-        player.image = player.sprites.idleDown
-        break;
-      case "left":
-        player.image = player.sprites.idleLeft
-        break;
-      case "right":
-        player.image = player.sprites.idleRight
-        break;
-      default:
-        break;
-    }
-  }
-
-  // if (isColliding(ball, portalA) || isColliding(ball, portalB)) {
-  //   if (ball.direction === 'right') ball.position.x++
-  //   if (ball.direction === 'left') ball.position.x--
-  //   if (ball.direction === 'up') ball.position.y--
-  //   if (ball.direction === 'down') ball.position.y++
-  //   console.log('adjusting ball')
-  //   ballShadow.position = { ...ball.position, y: ball.position.y + 3 }
-  // }
-
-  document.getElementById('stat1').innerHTML = `<strong> Par ${state.par} | Strokes ${state.strokes}</strong > `
-  document.getElementById('stat2').innerHTML = `<strong> Club: ${parseInt(club.name) ? club.name + ' Iron' : club.name === 'w' ? 'Wedge' : 'Putter'}</strong > <br /> Ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}, w: ${Math.floor(ball.width)} `
-  document.getElementById('stat3').innerHTML = `<pre> ${JSON.stringify({ club: { name: club.name, max: club.max, loft: club.loft }, ...{ powerBar }, counter, ballFrames, ...{ state }, }, null, 2)}</pre > `
-
-  window.requestAnimationFrame(animate)
-}
-
 animate()
 
-let tempshit = 0
-const tempAnimate = () => {
-  switch (tempshit) {
-    case 0:
-      ball.fillStyle = 'rgba(255, 0, 255, 1)'
-      break;
-    case 1:
-      ball.fillStyle = 'rgba(255, 0, 255, 0.75)'
-      ballTarget.fillStyle = 'rgba(255, 0, 0, 1)'
-      break;
-    case 2:
-      ball.fillStyle = 'rgba(255, 0, 255, 0.5)'
-      ballTarget.fillStyle = 'rgba(255, 0, 0, 0.75)'
-      break;
-    case 3:
-      ball.fillStyle = 'rgba(255, 0, 255, 0.25)'
-      ballTarget.fillStyle = 'rgba(255, 0, 0, 0.5)'
-      break;
-    case 4:
-      ball.fillStyle = 'rgba(255, 0, 255, 0)'
-      ballTarget.fillStyle = 'rgba(255, 0, 0, 0.25)'
-      break;
-    case 5:
-      ball.fillStyle = 'rgba(255, 0, 255, 0)'
-      ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB, counter / ballFrames)
-      ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB, counter / ballFrames)
-      break
-    // file deepcode ignore DuplicateCaseBody: <please specify a reason of ignoring this>
-    case 6:
-      ball.fillStyle = 'rgba(255, 0, 255, 0.25)'
-      break;
-    case 7:
-      ball.fillStyle = 'rgba(255, 0, 255, 0.5)'
-      ballTarget.fillStyle = 'rgba(255, 0, 0, 0.25)'
-      break;
-    case 8:
-      ball.fillStyle = 'rgba(255, 0, 255, 0.75)'
-      ballTarget.fillStyle = 'rgba(255, 0, 0, .5)'
-      break;
-    case 9:
-      ball.fillStyle = 'rgba(255, 0, 255, 1)'
-      ballTarget.fillStyle = 'rgba(255, 0, 0, .75)'
-      break;
-    case 10:
-      ball.fillStyle = 'rgba(255, 255, 255, 1)'
-      ballTarget.fillStyle = 'rgba(255, 0, 0, 1)'
-      window.requestAnimationFrame(animateBall)
-      break;
-    default:
-      break;
-  }
-  tempshit++
-  if (tempshit <= 11) window.requestAnimationFrame(tempAnimate)
-}
-
-const animatePowerBar = () => {
-  if (state.mode === 'powerBar') {
-    // determine power of swing
-    if (barDirection === 'grow') {
-      if (powerBar.height < club.max) powerBar.height += barHeightSpeed
-      else barDirection = 'shrink'
-    } else if (barDirection === 'shrink') {
-      if (powerBar.height > 10) powerBar.height -= barHeightSpeed
-      else barDirection = 'grow'
-    }
-    if (powerBar.height === club.max) barDirection = 'shrink'
-    else if (powerBar.height === 0) barDirection = 'grow'
-  }
-
-  if (state.mode === 'rotateBar') {
-    // console.log('rotating bar')
-    powerBar.rotation += barAngleSpeed
-    if (player.direction === 'down') {
-      if (powerBar.rotation < 3 * Math.PI + 1 * Math.PI / 4) {
-        barAngleSpeed = -barAngleSpeed;
-      }
-      if (powerBar.rotation > 3 * Math.PI - 1 * Math.PI / 4) {
-        barAngleSpeed = -barAngleSpeed;
-      }
-    }
-    if (player.direction === 'right') {
-      if (powerBar.rotation < 2 * Math.PI + Math.PI / 2 + Math.PI / 4) {
-        barAngleSpeed = -barAngleSpeed;
-      }
-      if (powerBar.rotation > 2 * Math.PI + Math.PI / 2 - Math.PI / 4) {
-        barAngleSpeed = -barAngleSpeed;
-      }
-    }
-    if (player.direction === 'up') {
-      if (powerBar.rotation < 7 * Math.PI / 4) {
-        barAngleSpeed = -barAngleSpeed;
-      }
-      if (powerBar.rotation > 2 * Math.PI + 1 * Math.PI / 4) {
-        barAngleSpeed = -barAngleSpeed;
-      }
-    }
-    if (player.direction === 'left') {
-      if (powerBar.rotation < 2 * Math.PI + 3 * Math.PI / 2 + Math.PI / 4) {
-        barAngleSpeed = -barAngleSpeed;
-      }
-      if (powerBar.rotation > 2 * Math.PI + 3 * Math.PI / 2 - Math.PI / 4) {
-        barAngleSpeed = -barAngleSpeed;
-      }
-    }
-
-  }
-  powerBar.draw()
-  // ballTarget.draw()
-
-  // set ball's position to calculated points
-  ballTarget.position.x = getDistanceX(powerBar) //+ barDirection === 'grow' ? ball.width : -ball.width
-  ballTarget.position.y = getDistanceY(powerBar) //+ barDirection === 'grow' ? ball.height : -ball.height
-
-  if (state.mode !== 'move') window.requestAnimationFrame(animatePowerBar)
-}
-
-const animateBall = () => {
-  // ballTarget.width = ball.width
-  // ballTarget.position.x = getDistanceX(powerBar, counter / ballFrames) + .01
-  // ballTarget.position.y = getDistanceY(powerBar, counter / ballFrames) + .01
-
-  if (state.portal === "" && isColliding(ball, portalA)) {
-    console.log('portaled')
-    portalB.rotation = powerBar.rotation
-    state.portal = "b"
-    ballTarget.visible = true
-    window.requestAnimationFrame(tempAnimate)
-    return
-    // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB)
-    // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB)
-  } else if (state.portal === "" && isColliding(ball, portalB)) {
-    console.log('portaled')
-    portalA.rotation = powerBar.rotation
-    state.portal = 'a'
-    ball.position.x = getDistanceX(portalA)
-    ball.position.y = getDistanceY(portalA)
-  } else {
-
-    // arc motion
-    const gravity = 2
-    const dz = (ballFrames * counter - 0.5 * gravity * Math.pow(counter, 2)) / ballFrames * powerBar.height / club.max
-    if (dz < 3 || club.loft < 3) {
-      ball.width = 3
-      ball.position.z = 0
-      ballShadow.position.x = ball.position.x - 3
-      ballShadow.position.y = ball.position.y - 3
-    } else if (dz > club.loft && club.loft > 3) {
-      ball.width = club.loft
-      ball.position.z = club.loft
-      ballShadow.position.x = ball.position.x - club.loft - 3
-      ballShadow.position.y = ball.position.y - club.loft - 3
-    } else {
-      ball.width = dz
-      ball.position.z = dz
-      ballShadow.position.x = ball.position.x - dz
-      ballShadow.position.y = ball.position.y - dz
-    }
-    ballShadow.fillStyle = `rgba(0, 0, 0, ${0.5 - dz / 100})`
-
-    // planar motion
-    switch (state.portal) {
-      case 'a':
-        // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalA, counter / ballFrames)
-        // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalA, counter / ballFrames)
-        break;
-      case 'b':
-        // ball.position.x = portalB.position.x + portalB.width - ball.position.x + getDistanceX(portalB, counter / ballFrames)
-        // ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalB, counter / ballFrames)
-        break;
-      case '':
-      default:
-        if (isMovePossible({ ...ball, position: { x: ball.position.x + 1, y: ball.position.y + 1, z: ball.position.z } })) {
-          ball.position.x = getDistanceX(powerBar, counter / ballFrames)
-          ball.position.y = getDistanceY(powerBar, counter / ballFrames)
-          // colliders need a z value to determine if ball is over them
-        } else {
-          // insert collision logic here
-        }
-    }
-
-  }
-  ballShadow.draw()
-  ball.draw()
-
-  if (counter < ballFrames) {
-    counter++
-    window.requestAnimationFrame(animateBall)
-  } else {
-    counter = MAX_BALL_FRAMES - MAX_BALL_FRAMES
-    state.portal = ""
-    ballTarget.visible = false
-  }
-}
-
-const getDistanceX = (boundary, percent = 1) => boundary.position.x + Math.cos(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.width / 4
-const getDistanceY = (boundary, percent = 1) => boundary.position.y + Math.sin(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.height / 4
-
-canvas.addEventListener('click', function (event) {
-  var rect = canvas.getBoundingClientRect();
-  var x = event.clientX - rect.left;
-  var y = event.clientY - rect.top;
-  console.log(`Click.X: ${x} Y: ${y} `);
-  // Loop through boundaries and check if click matches a boundary
-  // boundaries.forEach((boundary) => {
-  //   if (x >= boundary.position.x && x <= boundary.position.x + boundary.width &&
-  //     y >= boundary.position.y && y <= boundary.position.y + boundary.height) {
-  //     // Log the boundary's details
-  //     console.log(`Boundary clicked.X: ${ boundary.position.x } Y: ${ boundary.position.y } `);
-  //   }
-  // });
+canvas.addEventListener('click', (event) => {
+  var x = event.offsetX
+  var y = event.offsetY
+  console.log(`x: ${x} y: ${y}`);
+  debugBall.position = { x, y, z: 0 }
+  debugBall.visible = true
+  // debugBall.draw()
 }, false);
