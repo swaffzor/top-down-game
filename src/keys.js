@@ -113,7 +113,7 @@ window.addEventListener('keydown', (event) => {
       lastKey = 'i'
       break
     case 'o':
-      counter = 0
+      frame = 0
       window.requestAnimationFrame(animateBall)
       keys.o.pressed = true
       lastKey = 'o'

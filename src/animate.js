@@ -138,7 +138,7 @@ const animate = () => {
 
   document.getElementById('stat1').innerHTML = `<strong> Par ${state.par} | Strokes ${state.strokes}</strong > `
   document.getElementById('stat2').innerHTML = `<strong> Club: ${parseInt(club.name) ? club.name + ' Iron' : club.name === 'w' ? 'Wedge' : 'Putter'}</strong > <br /> Ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}, w: ${Math.floor(ball.width)} `
-  document.getElementById('stat3').innerHTML = `<pre> ${JSON.stringify({ club: { name: club.name, max: club.max, loft: club.loft }, ...{ powerBar }, counter, ballFrames, ...{ state }, }, null, 2)}</pre > `
+  document.getElementById('stat3').innerHTML = `<pre> ${JSON.stringify({ club: { name: club.name, max: club.max, loft: club.loft }, ...{ powerBar }, frame, ballFrames, ...{ state }, }, null, 2)}</pre > `
 
   window.requestAnimationFrame(animate)
 }
@@ -168,8 +168,8 @@ const tempAnimate = () => {
       break;
     case 5:
       ball.fillStyle = 'rgba(255, 0, 255, 0)'
-      ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB, counter / ballFrames)
-      ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB, counter / ballFrames)
+      ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB, frame / ballFrames)
+      ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB, frame / ballFrames)
       break
     // file deepcode ignore DuplicateCaseBody: <please specify a reason of ignoring this>
     case 6:
@@ -280,7 +280,7 @@ const animateBall = () => {
 
     // arc motion
     const gravity = 2
-    const dz = (ballFrames * counter - 0.5 * gravity * Math.pow(counter, 2)) / ballFrames * powerBar.height / club.max
+    const dz = (ballFrames * frame - 0.5 * gravity * Math.pow(frame, 2)) / ballFrames * powerBar.height / club.max
     if (dz < 3 || club.loft < 3) {
       ball.width = 3
       ball.position.z = 0
@@ -302,18 +302,18 @@ const animateBall = () => {
     // planar motion
     switch (state.portal) {
       case 'a':
-        // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalA, counter / ballFrames)
-        // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalA, counter / ballFrames)
+        // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalA, frame / ballFrames)
+        // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalA, frame / ballFrames)
         break;
       case 'b':
-        // ball.position.x = portalB.position.x + portalB.width - ball.position.x + getDistanceX(portalB, counter / ballFrames)
-        // ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalB, counter / ballFrames)
+        // ball.position.x = portalB.position.x + portalB.width - ball.position.x + getDistanceX(portalB, frame / ballFrames)
+        // ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalB, frame / ballFrames)
         break;
       case '':
       default:
         if (isMovePossible({ ...ball, position: { x: ball.position.x + 1, y: ball.position.y + 1, z: ball.position.z } })) {
-          const dx = getDistanceX(powerBar, counter / ballFrames)
-          const dy = getDistanceY(powerBar, counter / ballFrames)
+          const dx = getDistanceX(powerBar, frame / ballFrames)
+          const dy = getDistanceY(powerBar, frame / ballFrames)
           state.delta = { x: ball.position.x - dx, y: ball.position.y - dy }
           ball.position.x = dx
           ball.position.y = dy
@@ -331,13 +331,13 @@ const animateBall = () => {
     movable.position.y += state.delta.y * movable.scale
   })
 
-  if (counter < ballFrames) {
-    counter++
+  if (frame < ballFrames) {
+    frame++
     window.requestAnimationFrame(animateBall)
   } else {
-    counter = MAX_BALL_FRAMES - MAX_BALL_FRAMES
     state.portal = ""
     ballTarget.visible = false
+    frame = 0
     movables = [player, powerBar, clubRadius]
   }
 }
