@@ -56,34 +56,32 @@ const animate = () => {
   }
   // move "camera"
   if (keys.p.pressed) {
-    setMoveEverything()
-    movables.forEach(movable => {
+    cameraMovables.forEach(movable => {
       movable.position.y += 1 * movable.scale
     })
   }
   if (keys.l.pressed) {
-    setMoveEverything()
-    movables.forEach(movable => {
+    cameraMovables.forEach(movable => {
       movable.position.x += 1 * movable.scale
     })
   }
   if (keys.semicolon.pressed) {
-    setMoveEverything()
-    movables.forEach(movable => {
+    cameraMovables.forEach(movable => {
       movable.position.y -= 1 * movable.scale
     })
   }
   if (keys.apostrophe.pressed) {
-    setMoveEverything()
-    movables.forEach(movable => {
+    cameraMovables.forEach(movable => {
       movable.position.x -= 1 * movable.scale
     })
   }
-  if (!keys.p.pressed && !keys.l.pressed && !keys.semicolon.pressed && !keys.apostrophe.pressed && (lastKey === 'p' || lastKey === 'l' || lastKey === ';' || lastKey === "'")) {
-    console.log('camera mode off')
-    state.mode = 'move'
-    movables = [player, powerBar, clubRadius]
-  }
+
+  // detect if ball is off screen
+  // if (ball.position) {
+  //   ballPointer.visible = true
+  // } else {
+  //   ballPointer.visible = false
+  // }
 
   if (isColliding(ball, hole)) {
     console.log('ball in hole')
@@ -138,7 +136,7 @@ const animate = () => {
 
   document.getElementById('stat1').innerHTML = `<strong> Par ${state.par} | Strokes ${state.strokes}</strong > `
   document.getElementById('stat2').innerHTML = `<strong> Club: ${parseInt(club.name) ? club.name + ' Iron' : club.name === 'w' ? 'Wedge' : 'Putter'}</strong > <br /> Ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}, w: ${Math.floor(ball.width)} `
-  document.getElementById('stat3').innerHTML = `<pre> ${JSON.stringify({ club: { name: club.name, max: club.max, loft: club.loft }, ...{ powerBar }, frame, ballFrames, ...{ state }, }, null, 2)}</pre > `
+  document.getElementById('stat3').innerHTML = `<pre> ${JSON.stringify({ club: { name: club.name, max: club.max, loft: club.loft }, frame, ballFrames, ...{ state }, }, null, 2)}</pre > `
 
   window.requestAnimationFrame(animate)
 }
@@ -326,7 +324,7 @@ const animateBall = () => {
   ballShadow.draw()
   ball.draw()
 
-  movables.forEach(movable => {
+  cameraMovables.forEach(movable => {
     movable.position.x += state.delta.x * movable.scale
     movable.position.y += state.delta.y * movable.scale
   })
@@ -353,7 +351,7 @@ const animateBackToPlayer = () => {
     x: Math.cos(angle) * distance,
     y: Math.sin(angle) * distance
   }
-  movables.forEach(movable => {
+  cameraMovables.forEach(movable => {
     movable.position.x += state.delta.x * movable.scale * frame / ballFrames
     movable.position.y += state.delta.y * movable.scale * frame / ballFrames
   })
@@ -363,30 +361,11 @@ const animateBackToPlayer = () => {
     window.requestAnimationFrame(animateBackToPlayer)
   } else {
     frame = 0
-    movables = [player, powerBar, clubRadius]
   }
 }
 
 const getDistanceX = (boundary, percent = 1) => boundary.position.x + Math.cos(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.width / 4
 const getDistanceY = (boundary, percent = 1) => boundary.position.y + Math.sin(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.height / 4
-
-const setMoveEverything = (exceptions = []) => {
-  console.log('moving everything')
-  movables = [
-    ballTarget,
-    ballShadow,
-    ball,
-    portalA,
-    portalB,
-    hole,
-    debugBall,
-    player,
-    powerBar,
-    clubRadius,
-    ...boundaries,
-    ...grounds,
-  ].filter(movable => !exceptions.map(e => e.name).includes(movable.name))
-}
 
 const debugDraw = () => {
   boundaries.forEach(boundary => {

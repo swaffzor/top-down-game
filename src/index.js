@@ -206,10 +206,10 @@ const camera = new Collider({
   position: { ...player.position },
   width: 3,
   height: 3,
-  shape: 'circle',
-  visible: false,
-  fillStyle: 'rgba(255, 255, 0, 0)',
-  strokeStyle: 'rgba(255, 255, 0, 0)',
+  shape: 'rect',
+  visible: true,
+  fillStyle: 'rgba(255, 255, 0, 1)',
+  strokeStyle: 'rgba(255, 255, 0, 1)',
 })
 
 const holePointer = new Collider({
@@ -259,24 +259,39 @@ const holePointer = new Collider({
 const grounds = [background]
 
 let movables = [
-  // ballShadow,
-  // ball,
-  // portalA,
-  // portalB,
-  // hole,
-  // debugBall,
+  background,
+  ballShadow,
+  ball,
+  portalA,
+  portalB,
+  hole,
+  debugBall,
   // ...boundaries,
+  // powerBar,
+  // clubRadius,
+  // player,
+  // camera,
+]
+
+let cameraMovables = [
+  ballTarget,
+  ballShadow,
+  ball,
+  portalA,
+  portalB,
+  hole,
+  debugBall,
+  player,
   powerBar,
   clubRadius,
-  player,
-  camera,
+  ...boundaries,
+  ...grounds,
 ]
 
 let drawables = [
   background,
   portalA,
   portalB,
-  holePointer,
   hole,
   ballShadow,
   ballTarget,
@@ -284,6 +299,9 @@ let drawables = [
   clubRadius,
   player,
   debugBall,
+  holePointer,
+  ballPointer,
+  camera,
 ]
 
 let state = {

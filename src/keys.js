@@ -58,7 +58,6 @@ window.addEventListener('keydown', (event) => {
       } else if (state.mode === 'powerBar') {
         ballFrames = MAX_BALL_FRAMES * powerBar.height / club.max
         state.strokes++
-        setMoveEverything()
         state.mode = 'move'
         window.requestAnimationFrame(animateBall)
       }
@@ -158,22 +157,18 @@ window.addEventListener('keydown', (event) => {
       break
     case 'p':
       keys.p.pressed = true
-      state.mode = 'camera'
       lastKey = 'p'
       break
     case 'l':
       keys.l.pressed = true
-      state.mode = 'camera'
       lastKey = 'l'
       break
     case ";":
       keys.semicolon.pressed = true
-      state.mode = 'camera'
       lastKey = ';'
       break
     case "'":
       keys.apostrophe.pressed = true
-      state.mode = 'camera'
       lastKey = "'"
       break
     case 'c':

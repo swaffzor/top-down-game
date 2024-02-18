@@ -38,7 +38,7 @@ const makePlayerMove = (direction) => {
   player.image = player.sprites[direction]
 
   const axis = direction === 'down' || direction === 'up' ? 'y' : 'x'
-  const polarity = direction === 'down' || direction === 'right' ? 1 : -1
+  const polarity = direction === 'up' || direction === 'left' ? 1 : -1
 
   const movingDistance = polarity * (player.running ? RUN : STEP)
   const movingOffset = -1 * polarity * (player.running ? OFFSET * RUN : OFFSET)
