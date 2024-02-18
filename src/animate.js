@@ -319,10 +319,7 @@ const animateBall = () => {
 
         }
     }
-
   }
-  ballShadow.draw()
-  ball.draw()
 
   cameraMovables.forEach(movable => {
     movable.position.x += state.delta.x * movable.scale
