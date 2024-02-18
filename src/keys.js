@@ -178,7 +178,7 @@ window.addEventListener('keydown', (event) => {
       break
     case 'c':
       keys.c.pressed = true
-      holePointer.visible = !holePointer.visible
+      holePointer.visible = true
       lastKey = 'c'
 
       break

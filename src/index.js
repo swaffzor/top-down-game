@@ -201,6 +201,17 @@ const debugBall = new Collider({
   strokeStyle: 'rgba(255, 255, 0, 1)',
 })
 
+const camera = new Collider({
+  name: 'camera',
+  position: { ...player.position },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  visible: false,
+  fillStyle: 'rgba(255, 255, 0, 0)',
+  strokeStyle: 'rgba(255, 255, 0, 0)',
+})
+
 const holePointer = new Collider({
   name: 'holePointer',
   position: { ...player.position },
@@ -258,6 +269,7 @@ let movables = [
   powerBar,
   clubRadius,
   player,
+  camera,
 ]
 
 let drawables = [

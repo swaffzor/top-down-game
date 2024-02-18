@@ -338,6 +338,31 @@ const animateBall = () => {
     state.portal = ""
     ballTarget.visible = false
     frame = 0
+    ballFrames = MAX_BALL_FRAMES
+    window.requestAnimationFrame(animateBackToPlayer)
+  }
+}
+
+const animateBackToPlayer = () => {
+  const dx = camera.position.x - player.position.x
+  const dy = camera.position.y - player.position.y
+  const distance = Math.sqrt(dx * dx + dy * dy)
+  const angle = Math.atan2(dy, dx)
+
+  state.delta = {
+    x: Math.cos(angle) * distance,
+    y: Math.sin(angle) * distance
+  }
+  movables.forEach(movable => {
+    movable.position.x += state.delta.x * movable.scale * frame / ballFrames
+    movable.position.y += state.delta.y * movable.scale * frame / ballFrames
+  })
+
+  if (frame < ballFrames && (Math.abs(dx) > 1 && Math.abs(dy) > 1)) {
+    frame++
+    window.requestAnimationFrame(animateBackToPlayer)
+  } else {
+    frame = 0
     movables = [player, powerBar, clubRadius]
   }
 }
@@ -360,7 +385,7 @@ const setMoveEverything = (exceptions = []) => {
     clubRadius,
     ...boundaries,
     ...grounds,
-  ].filter(movable => !exceptions.includes(movable))
+  ].filter(movable => !exceptions.map(e => e.name).includes(movable.name))
 }
 
 const debugDraw = () => {
