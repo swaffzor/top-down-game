@@ -91,6 +91,7 @@ class Collider {
     render = 'fill',
     visible = true,
     scale = 1,
+    customRender = () => { }
   }) {
     this.position = position
     this.width = width || Collider.width
@@ -106,6 +107,7 @@ class Collider {
     this.render = render
     this.strokeStyle = strokeStyle
     this.scale = scale
+    this.customRender = customRender
   }
 
   draw() {
@@ -118,27 +120,25 @@ class Collider {
       context.translate(this.position.x, this.position.y);
       context.rotate(this.rotation);
       if (this.shape === 'rect') {
-        this.render === 'fill'
-          ? context.fillRect(0, -this.height, this.width * visible, this.height)
-          : context.strokeRect(0, -this.height, this.width * visible, this.height)
+        context.fillRect(0, -this.height, this.width * visible, this.height)
+        context.strokeRect(0, -this.height, this.width * visible, this.height)
       } else if (this.shape === 'circle') {
         context.beginPath()
         context.arc(0, 0, this.width * visible, 0, 2 * Math.PI)
-        this.render === 'fill'
-          ? context.fill()
-          : context.stroke()
+        context.fill()
+        context.stroke()
       }
       context.restore();
     } else if (this.shape === 'rect') {
-      this.render === 'fill'
-        ? context.fillRect(this.position.x, this.position.y, this.width * visible, this.height)
-        : context.strokeRect(this.position.x, this.position.y, this.width * visible, this.height)
+      context.fillRect(this.position.x, this.position.y, this.width * visible, this.height)
+      context.strokeRect(this.position.x, this.position.y, this.width * visible, this.height)
     } else if (this.shape === 'circle') {
       context.beginPath()
       context.arc(this.position.x, this.position.y, this.width * visible, 0, 2 * Math.PI)
-      this.render === 'fill'
-        ? context.fill()
-        : context.stroke()
+      context.fill()
+      context.stroke()
+    } else if (this.shape === 'custom') {
+      this.visible && this.customRender()
     }
     // draw a border around the boundary
     // context.strokeStyle = 'rgba(255, 0, 0, 0.5)'

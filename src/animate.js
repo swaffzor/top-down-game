@@ -5,20 +5,19 @@ const draw = () => {
 
   // debugDraw()
 }
-
 const animate = () => {
   draw()
 
-  if (keys.w.pressed && lastKey === 'w') {
+  if (keys.w.pressed) {
     makePlayerMove('up')
   }
-  if (keys.s.pressed && lastKey === 's') {
+  if (keys.s.pressed) {
     makePlayerMove('down')
   }
-  if (keys.a.pressed && lastKey === 'a') {
+  if (keys.a.pressed) {
     makePlayerMove('left')
   }
-  if (keys.d.pressed && lastKey === 'd') {
+  if (keys.d.pressed) {
     makePlayerMove('right')
   }
 

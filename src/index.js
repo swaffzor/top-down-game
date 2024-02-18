@@ -43,64 +43,27 @@ const portalB = new Sprite({
   frames: { max: 7 },
 })
 
-const hole = new Sprite({
-  name: 'hole',
-  image: './sprites/hole.png',
-  position: { x: 240, y: 200, z: 0 },
-  frames: { max: 1 },
-  width: 15,
-  height: 10,
-  shape: 'rect',
-  fillStyle: 'rgba(255, 0, 0, 0)'
-})
-
-const ball = new Collider({
-  name: 'ball',
-  position: { x: 379, y: 247, z: 0 },
-  width: 3,
-  height: 3,
-  shape: 'circle',
-  fillStyle: 'rgba(255, 255, 255, 1)'
-})
-
-const ballTarget = new Collider({
-  name: 'ballTarget',
-  position: { x: ball.position.x, y: ball.position.y },
-  width: 3,
-  height: 3,
-  shape: 'circle',
-  fillStyle: 'rgba(255, 0, 0, 0.75)',
-  visible: false,
-})
-
-const ballShadow = new Collider({
-  name: 'ballShadow',
-  position: { x: ball.position.x, y: ball.position.y + 3 },
-  width: 3,
-  height: 3,
-  shape: 'circle',
-  fillStyle: 'rgba(0, 0, 0, 0.5)'
-})
 
 const powerBar = new Collider({
   name: 'powerBar',
-  position: { ...ball.position },
+  position: { x: 0, y: 0, z: 0 },
   width: 3,
   height: 100,
   rotation: 2 * Math.PI,
   shape: 'rect',
-  fillStyle: 'rgba(255, 0, 255, 1)'
+  fillStyle: 'rgba(255, 0, 255, 1)',
+  strokeStyle: 'rgba(255, 0, 0, 1)',
 })
 
 const clubRadius = new Collider({
   name: 'clubRadius',
-  position: { ...ball.position },
+  position: { ...powerBar.position },
   width: 100,
   height: 10,
   shape: 'circle',
   fillStyle: 'rgba(0, 0, 255, 0.25)',
   strokeStyle: 'rgba(0, 0, 255, 0.5)',
-  render: 'stroke',
+  renderMode: 'stroke',
   visible: false,
 })
 
@@ -132,30 +95,72 @@ const player = new Sprite({
   }
 })
 
+const hole = new Sprite({
+  name: 'hole',
+  image: './sprites/hole.png',
+  position: { x: canvas.width + Math.random() * 1000, y: canvas.height + Math.random() * 1000, z: 0 },
+  frames: { max: 1 },
+  width: 15,
+  height: 10,
+  shape: 'rect',
+  fillStyle: 'rgba(255, 0, 0, 0)'
+})
+
+const ball = new Collider({
+  name: 'ball',
+  position: { x: player.position.x, y: player.position.y + 10, z: 0 },
+  width: 4,
+  height: 4,
+  shape: 'circle',
+  fillStyle: 'rgba(255, 255, 255, 1)',
+  strokeStyle: 'rgba(0, 0, 0, 0.25)',
+})
+
+const ballTarget = new Collider({
+  name: 'ballTarget',
+  position: { x: ball.position.x, y: ball.position.y },
+  width: 3,
+  height: 3,
+  shape: 'circle',
+  fillStyle: 'rgba(255, 0, 0, 0.75)',
+  strokeStyle: 'rgba(0, 0, 0, 0.5)',
+  visible: false,
+})
+
+const ballShadow = new Collider({
+  name: 'ballShadow',
+  position: { x: ball.position.x, y: ball.position.y + 3 },
+  width: 2,
+  height: 2,
+  shape: 'circle',
+  fillStyle: 'rgba(0, 0, 0, 0.5)',
+  strokeStyle: 'rgba(0, 0, 0, 0.5)',
+})
+
 let club = {
   position: { x: player.position.x + 16, y: player.position.y },
   max: 100,
   loft: 0,
-  name: '5',
+  name: '1',
   bag: {
-    1: { name: '1', max: 100, loft: 3, barHeightSpeed: 1, barAngleSpeed: 0.15 / 10 },
-    2: { name: '2', max: 90, loft: 5, barHeightSpeed: 1, barAngleSpeed: 0.14 / 10 },
-    3: { name: '3', max: 80, loft: 7, barHeightSpeed: 1.5, barAngleSpeed: 0.13 / 10 },
-    4: { name: '4', max: 70, loft: 10, barHeightSpeed: 1.5, barAngleSpeed: 0.12 / 10 },
-    5: { name: '5', max: 60, loft: 13, barHeightSpeed: 1, barAngleSpeed: 0.11 / 10 },
-    6: { name: '6', max: 50, loft: 16, barHeightSpeed: 1, barAngleSpeed: 0.10 / 10 },
-    7: { name: '7', max: 40, loft: 19, barHeightSpeed: 1.5, barAngleSpeed: 0.09 / 10 },
-    8: { name: '8', max: 30, loft: 22, barHeightSpeed: 1.5, barAngleSpeed: 0.08 / 10 },
-    9: { name: '9', max: 20, loft: 25, barHeightSpeed: 1, barAngleSpeed: 0.07 / 10 },
-    w: { name: 'w', max: 10, loft: 30, barHeightSpeed: 1.75, barAngleSpeed: 0.06 / 10 },
-    p: { name: 'p', max: 35, loft: 0, barHeightSpeed: 1.5, barAngleSpeed: 0.13 / 10 },
+    1: { name: '1', max: 500, loft: 3, barHeightSpeed: 1, barAngleSpeed: 0.15 / 10 },
+    2: { name: '2', max: 450, loft: 5, barHeightSpeed: 1, barAngleSpeed: 0.14 / 10 },
+    3: { name: '3', max: 400, loft: 7, barHeightSpeed: 1.5, barAngleSpeed: 0.13 / 10 },
+    4: { name: '4', max: 350, loft: 10, barHeightSpeed: 1.5, barAngleSpeed: 0.12 / 10 },
+    5: { name: '5', max: 300, loft: 13, barHeightSpeed: 1, barAngleSpeed: 0.11 / 10 },
+    6: { name: '6', max: 250, loft: 16, barHeightSpeed: 1, barAngleSpeed: 0.10 / 10 },
+    7: { name: '7', max: 200, loft: 19, barHeightSpeed: 1.5, barAngleSpeed: 0.09 / 10 },
+    8: { name: '8', max: 150, loft: 22, barHeightSpeed: 1.5, barAngleSpeed: 0.08 / 10 },
+    9: { name: '9', max: 100, loft: 25, barHeightSpeed: 1, barAngleSpeed: 0.07 / 10 },
+    w: { name: 'w', max: 110, loft: 30, barHeightSpeed: 1.75, barAngleSpeed: 0.06 / 10 },
+    p: { name: 'p', max: 135, loft: 0, barHeightSpeed: 1.5, barAngleSpeed: 0.13 / 10 },
   }
 }
 club = { ...club.bag[club.name], bag: { ...club.bag } }
 
 const collisionsMap = []
 for (let i = 0; i < collisions.length; i += 26) {
-  collisionsMap.push(collisions.slice(i, i + 26))
+  // collisionsMap.push(collisions.slice(i, i + 26))
 }
 
 const boundaryHeight = {
@@ -193,6 +198,8 @@ const debugBall = new Collider({
   shape: 'circle',
   visible: false,
   fillStyle: 'rgba(255, 255, 0, 0.8)',
+  strokeStyle: 'rgba(255, 255, 0, 1)',
+})
 })
 
 const grounds = [background, foreground]
