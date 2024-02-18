@@ -2,12 +2,12 @@
 const canvas = document.getElementById("myCanvas");
 const context = canvas.getContext("2d");
 
-canvas.width = 900 //* 16
-canvas.height = 506 //* 9
+canvas.width = 1150  //* 16
+canvas.height = 600 //* 9
 
 const initMapPos = { x: canvas.width / 6, y: canvas.height / 6 }
-const background = new Sprite({ name: 'background', image: './sprites/test-map.png', position: initMapPos, scale: 0.5 })
-const foreground = new Sprite({ name: 'foreground', image: './sprites/test-map-foreground.png', position: initMapPos, scale: 0.5 })
+const background = new Sprite({ name: 'background', image: './sprites/golf-course-test.png', position: initMapPos, scale: 1 })
+// const foreground = new Sprite({ name: 'foreground', image: './sprites/test-map-foreground.png', position: initMapPos, scale: 0.5 })
 
 const spriteCount = 6
 const spriteWidth = 16
@@ -200,9 +200,52 @@ const debugBall = new Collider({
   fillStyle: 'rgba(255, 255, 0, 0.8)',
   strokeStyle: 'rgba(255, 255, 0, 1)',
 })
+
+const holePointer = new Collider({
+  name: 'holePointer',
+  position: { ...player.position },
+  width: 10,
+  height: 50,
+  shape: 'custom',
+  fillStyle: 'rgba(255, 255, 255, 0.5)',
+  strokeStyle: 'rgba(255, 255, 255, 1)',
+  renderMode: 'fill',
+  visible: false,
+  customRender: () => {
+    context.fillStyle = holePointer.fillStyle
+    context.strokeStyle = holePointer.strokeStyle
+    const point1 = ball.position
+    const point2 = hole.position
+
+    const deltaX = point2.x - point1.x;
+    const deltaY = point2.y - point1.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const angleInRadians = Math.atan2(deltaY, deltaX);
+
+    const shortPoint = {
+      x: point1.x + Math.cos(angleInRadians) * distance * .15,
+      y: point1.y + Math.sin(angleInRadians) * distance * .15,
+    }
+
+    context.save();
+    context.lineWidth = 5
+    context.beginPath();
+    context.moveTo(point1.x, point1.y);
+    context.lineTo(shortPoint.x, shortPoint.y);
+    context.stroke();
+
+    context.translate(shortPoint.x, shortPoint.y);
+    context.rotate(angleInRadians);
+    context.beginPath();
+    context.moveTo(-10, -5);
+    context.lineTo(0, 0);
+    context.lineTo(-10, 5);
+    context.stroke();
+    context.restore();
+  }
 })
 
-const grounds = [background, foreground]
+const grounds = [background]
 
 let movables = [
   // ballShadow,
@@ -221,15 +264,14 @@ let drawables = [
   background,
   portalA,
   portalB,
+  holePointer,
   hole,
   ballShadow,
   ballTarget,
   ball,
   clubRadius,
   player,
-  foreground,
   debugBall,
-  ...boundaries,
 ]
 
 let state = {

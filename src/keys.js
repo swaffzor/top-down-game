@@ -176,6 +176,12 @@ window.addEventListener('keydown', (event) => {
       state.mode = 'camera'
       lastKey = "'"
       break
+    case 'c':
+      keys.c.pressed = true
+      holePointer.visible = !holePointer.visible
+      lastKey = 'c'
+
+      break
     default:
       break;
   }
@@ -186,14 +192,14 @@ window.addEventListener('keydown', (event) => {
 const eraseClubRadius = () => {
   radiusTimeout = setTimeout(() => {
     clubRadius.visible = false
-    console.log('removed clubRadius')
+    console.log('erased clubRadius')
   }, 3000)
 }
 
 const eraseBallTarget = () => {
   timeOutValue = setTimeout(() => {
     ballTarget.visible = false
-    console.log('removed ballTarget')
+    console.log('erased ballTarget')
   }, 3000)
 }
 
@@ -277,6 +283,12 @@ window.addEventListener('keyup', (event) => {
     case "'":
       keys.apostrophe.pressed = false
       break
+    case 'c':
+      setTimeout(() => {
+        holePointer.visible = false
+      }, 3000)
+      keys.c.pressed = false
+      break
 
     default:
       break;
@@ -348,6 +360,9 @@ const keys = {
     pressed: false,
   },
   apostrophe: {
+    pressed: false,
+  },
+  c: {
     pressed: false,
   },
 }
