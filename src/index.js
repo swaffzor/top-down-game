@@ -256,6 +256,50 @@ const holePointer = new Collider({
   }
 })
 
+const ballPointer = new Collider({
+  name: 'ballPointer',
+  position: { ...player.position },
+  width: 10,
+  height: 50,
+  shape: 'custom',
+  fillStyle: 'rgba(255, 0, 255, 0.5)',
+  strokeStyle: 'rgba(255, 0, 255, 1)',
+  renderMode: 'fill',
+  visible: false,
+  customRender: () => {
+    context.fillStyle = ballPointer.fillStyle
+    context.strokeStyle = ballPointer.strokeStyle
+    const point1 = player.position
+    const point2 = ball.position
+
+    const deltaX = point2.x - point1.x;
+    const deltaY = point2.y - point1.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const angleInRadians = Math.atan2(deltaY, deltaX);
+
+    const shortPoint = {
+      x: point1.x + Math.cos(angleInRadians) * distance * .15,
+      y: point1.y + Math.sin(angleInRadians) * distance * .15,
+    }
+
+    context.save();
+    context.lineWidth = 5
+    context.beginPath();
+    context.moveTo(point1.x, point1.y);
+    context.lineTo(shortPoint.x, shortPoint.y);
+    context.stroke();
+
+    context.translate(shortPoint.x, shortPoint.y);
+    context.rotate(angleInRadians);
+    context.beginPath();
+    context.moveTo(-10, -5);
+    context.lineTo(0, 0);
+    context.lineTo(-10, 5);
+    context.stroke();
+    context.restore();
+  }
+})
+
 const grounds = [background]
 
 let movables = [
@@ -267,10 +311,6 @@ let movables = [
   hole,
   debugBall,
   // ...boundaries,
-  // powerBar,
-  // clubRadius,
-  // player,
-  // camera,
 ]
 
 let cameraMovables = [
@@ -301,7 +341,6 @@ let drawables = [
   debugBall,
   holePointer,
   ballPointer,
-  camera,
 ]
 
 let state = {

@@ -76,6 +76,12 @@ const animate = () => {
     })
   }
 
+  if (state.mode === 'rotateBar' || state.mode === 'powerBar') {
+    holePointer.visible = true
+  } else {
+    holePointer.visible = false
+  }
+
   // detect if ball is off screen
   // if (ball.position) {
   //   ballPointer.visible = true
@@ -123,6 +129,12 @@ const animate = () => {
       default:
         break;
     }
+  }
+
+  if (getDistanceBetween(player.position, ball.position) > 250) {
+    ballPointer.visible = true
+  } else {
+    ballPointer.visible = false
   }
 
   // if (isColliding(ball, portalA) || isColliding(ball, portalB)) {
@@ -363,6 +375,12 @@ const animateBackToPlayer = () => {
 
 const getDistanceX = (boundary, percent = 1) => boundary.position.x + Math.cos(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.width / 4
 const getDistanceY = (boundary, percent = 1) => boundary.position.y + Math.sin(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.height / 4
+
+const getDistanceBetween = (pointA, pointB) => {
+  const dx = pointA.x - pointB.x
+  const dy = pointA.y - pointB.y
+  return Math.sqrt(dx * dx + dy * dy)
+}
 
 const debugDraw = () => {
   boundaries.forEach(boundary => {
