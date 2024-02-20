@@ -1,32 +1,32 @@
 // file deepcode ignore DuplicateIfBody: <please specify a reason of ignoring this>
-const canvas = document.getElementById("myCanvas");
-const context = canvas.getContext("2d");
+const canvas = document.getElementById("myCanvas")
+const context = canvas.getContext("2d")
 
 canvas.width = 1150  //* 16
 canvas.height = 600 //* 9
 
-const initMapPos = { x: canvas.width / 6, y: canvas.height / 6 }
+const initMapPos = { x: canvas.width / 6 - 150, y: -2300 }
 const background = new Sprite({ name: 'background', image: './sprites/golf-course-test.png', position: initMapPos, scale: 1 })
 // const foreground = new Sprite({ name: 'foreground', image: './sprites/test-map-foreground.png', position: initMapPos, scale: 0.5 })
 
 const spriteCount = 6
 const spriteWidth = 16
-const playerImageDown = new Image();
+const playerImageDown = new Image()
 playerImageDown.src = './sprites/alex/run_down.png'
-const playerImageUp = new Image();
+const playerImageUp = new Image()
 playerImageUp.src = './sprites/alex/run_up.png'
-const playerImageLeft = new Image();
+const playerImageLeft = new Image()
 playerImageLeft.src = './sprites/alex/run_left.png'
-const playerImageRight = new Image();
+const playerImageRight = new Image()
 playerImageRight.src = './sprites/alex/run_right.png'
 
-const playerIdleUp = new Image();
+const playerIdleUp = new Image()
 playerIdleUp.src = './sprites/alex/idle_up.png'
-const playerIdleDown = new Image();
+const playerIdleDown = new Image()
 playerIdleDown.src = './sprites/alex/idle_down.png'
-const playerIdleLeft = new Image();
+const playerIdleLeft = new Image()
 playerIdleLeft.src = './sprites/alex/idle_left.png'
-const playerIdleRight = new Image();
+const playerIdleRight = new Image()
 playerIdleRight.src = './sprites/alex/idle_right.png'
 
 const portalA = new Sprite({
@@ -47,7 +47,7 @@ const portalB = new Sprite({
 const powerBar = new Collider({
   name: 'powerBar',
   position: { x: 0, y: 0, z: 0 },
-  width: 3,
+  width: 5,
   height: 100,
   rotation: 2 * Math.PI,
   shape: 'rect',
@@ -72,8 +72,9 @@ const player = new Sprite({
   name: 'player',
   image: './sprites/alex/idle_down.png',
   position: {
-    x: canvas.width / 2 - 30,
-    y: canvas.height / 2 - 30,
+    x: canvas.width / 2 - 8,
+    y: canvas.height / 2 - 8,
+    // x: 650, y: 400,
     z: 0,
   },
   direction: 'down',
@@ -90,7 +91,7 @@ const player = new Sprite({
     idleRight: playerIdleRight,
   },
   onLoad: (width, height) => {
-    powerBar.position = { x: player.position.x + width / 2, y: player.position.y + height / 2 }
+    powerBar.position = { x: camera.position.x + 2, y: camera.position.y + 2 }
     clubRadius.position = { x: player.position.x + width / 2, y: player.position.y + height / 2 }
   }
 })
@@ -98,7 +99,9 @@ const player = new Sprite({
 const hole = new Sprite({
   name: 'hole',
   image: './sprites/hole.png',
-  position: { x: canvas.width + Math.random() * 1000, y: canvas.height + Math.random() * 1000, z: 0 },
+  // position: { x: player.position.x, y: player.position.y - 500, z: 0 },
+  // position: { x: 650, y: 2300, z: 0 },
+  position: { x: Math.random() * 2000, y: Math.random() * 1000 - 500, z: 0 },
   frames: { max: 1 },
   width: 15,
   height: 10,
@@ -203,9 +206,10 @@ const debugBall = new Collider({
 
 const camera = new Collider({
   name: 'camera',
-  position: { ...player.position },
-  width: 3,
-  height: 3,
+  position: { x: canvas.width / 2 - 2, y: canvas.height / 2 - 2, z: 0 },
+  // position: { ...player.position },
+  width: 4,
+  height: 4,
   shape: 'rect',
   visible: true,
   fillStyle: 'rgba(255, 255, 0, 1)',
@@ -214,47 +218,73 @@ const camera = new Collider({
 
 const holePointer = new Collider({
   name: 'holePointer',
-  position: { ...player.position },
+  position: { x: player.position.x - 5, y: player.position.y },
   width: 10,
   height: 50,
   shape: 'custom',
-  fillStyle: 'rgba(255, 255, 255, 0.5)',
-  strokeStyle: 'rgba(255, 255, 255, 1)',
+  fillStyle: 'rgba(255, 255, 255, 1)',
+  strokeStyle: 'rgba(255, 255, 255, 0.5)',
   renderMode: 'fill',
-  visible: false,
+  visible: true,
   customRender: () => {
     context.fillStyle = holePointer.fillStyle
     context.strokeStyle = holePointer.strokeStyle
-    const point1 = ball.position
-    const point2 = hole.position
+    const point2 = { x: hole.position.x + 8, y: hole.position.y + 5 }
 
-    const deltaX = point2.x - point1.x;
-    const deltaY = point2.y - point1.y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const angleInRadians = Math.atan2(deltaY, deltaX);
+    const deltaX = point2.x - camera.position.x
+    const deltaY = point2.y - camera.position.y
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+    const angleInRadians = Math.atan2(deltaY, deltaX)
 
-    const shortPoint = {
-      x: point1.x + Math.cos(angleInRadians) * distance * .15,
-      y: point1.y + Math.sin(angleInRadians) * distance * .15,
+    const arrowStemEnd = {
+      x: camera.position.x + Math.cos(angleInRadians) * distance * .18,
+      y: camera.position.y + Math.sin(angleInRadians) * distance * .18,
+    }
+    const arrowTip = {
+      x: camera.position.x + Math.cos(angleInRadians) * distance * .2,
+      y: camera.position.y + Math.sin(angleInRadians) * distance * .2,
     }
 
-    context.save();
-    context.lineWidth = 5
-    context.beginPath();
-    context.moveTo(point1.x, point1.y);
-    context.lineTo(shortPoint.x, shortPoint.y);
-    context.stroke();
+    context.save()
+    context.lineWidth = 4
+    context.beginPath()
+    context.moveTo(camera.position.x + 2, camera.position.y + 2) // +2 to center the pointer on the 4x4 camera
+    context.lineTo(arrowStemEnd.x, arrowStemEnd.y)
+    context.stroke()
 
-    context.translate(shortPoint.x, shortPoint.y);
-    context.rotate(angleInRadians);
-    context.beginPath();
-    context.moveTo(-10, -5);
-    context.lineTo(0, 0);
-    context.lineTo(-10, 5);
-    context.stroke();
-    context.restore();
+    context.translate(arrowTip.x, arrowTip.y)
+    context.rotate(angleInRadians)
+    context.beginPath()
+    context.moveTo(-10, -5)
+    context.lineTo(0, 0)
+    context.lineTo(-10, 5)
+    context.fill()
+    context.restore()
   }
 })
+
+function getEdgePoint(p1, p2, canvas) {
+  const m = (p2.y - p1.y) / (p2.x - p1.x); // slope of the line
+  const b = p1.y - m * p1.x; // y-intercept of the line
+
+  let intersection = {};
+
+  // check where this line intersects the rectangular edges
+  const possibleHorzIntersectionX = p2.y > p1.y ? (canvas.height - b) / m : -b / m;
+  if (possibleHorzIntersectionX >= 0 && possibleHorzIntersectionX <= canvas.width) {
+    intersection.x = possibleHorzIntersectionX;
+    intersection.y = p2.y > p1.y ? canvas.height : 0;
+  } else {
+    const possibleVertIntersectionY = p2.x > p1.x ? m * canvas.width + b : m * 0 + b;
+    intersection.x = p2.x > p1.x ? canvas.width : 0;
+    intersection.y = possibleVertIntersectionY;
+  }
+  return intersection;
+}
+
+function mapToCanvas(point, scale) {
+  return { x: point.x * scale, y: point.y * scale };
+}
 
 const ballPointer = new Collider({
   name: 'ballPointer',
@@ -262,41 +292,47 @@ const ballPointer = new Collider({
   width: 10,
   height: 50,
   shape: 'custom',
-  fillStyle: 'rgba(255, 0, 255, 0.5)',
+  fillStyle: 'rgba(255, 0, 255, 1)',
   strokeStyle: 'rgba(255, 0, 255, 1)',
   renderMode: 'fill',
   visible: false,
   customRender: () => {
     context.fillStyle = ballPointer.fillStyle
     context.strokeStyle = ballPointer.strokeStyle
-    const point1 = player.position
-    const point2 = ball.position
+    const screenEdgePoint = getEdgePoint(camera.position, ball.position, canvas);
+    const pointBall = ball.position
 
-    const deltaX = point2.x - point1.x;
-    const deltaY = point2.y - point1.y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const angleInRadians = Math.atan2(deltaY, deltaX);
+    const deltaXB = pointBall.x - camera.position.x
+    const deltaYB = pointBall.y - camera.position.y
+    const deltaXE = screenEdgePoint.x - camera.position.x
+    const deltaYE = screenEdgePoint.y - camera.position.y
+    const distanceScreen = Math.sqrt(deltaXE * deltaXE + deltaYE * deltaYE)
+    const distanceToBall = Math.sqrt(deltaXB * deltaXB + deltaYB * deltaYB)
+    console.log('distanceToBall', distanceToBall, 'distanceScreen', distanceScreen)
+    if (distanceToBall < distanceScreen) return
 
-    const shortPoint = {
-      x: point1.x + Math.cos(angleInRadians) * distance * .15,
-      y: point1.y + Math.sin(angleInRadians) * distance * .15,
+    const angleScreen = Math.atan2(deltaYE, deltaXE)
+    const arrowStemEnd = {
+      x: camera.position.x + Math.cos(angleScreen) * 3 / 4 * distanceScreen,
+      y: camera.position.y + Math.sin(angleScreen) * 3 / 4 * distanceScreen,
     }
 
     context.save();
     context.lineWidth = 5
     context.beginPath();
-    context.moveTo(point1.x, point1.y);
-    context.lineTo(shortPoint.x, shortPoint.y);
+    context.moveTo(arrowStemEnd.x + 2, arrowStemEnd.y + 2)
+    context.lineTo(screenEdgePoint.x, screenEdgePoint.y)
     context.stroke();
 
-    context.translate(shortPoint.x, shortPoint.y);
-    context.rotate(angleInRadians);
-    context.beginPath();
-    context.moveTo(-10, -5);
-    context.lineTo(0, 0);
-    context.lineTo(-10, 5);
-    context.stroke();
-    context.restore();
+    context.translate(screenEdgePoint.x, screenEdgePoint.y)
+    context.rotate(angleScreen)
+    context.beginPath()
+    context.moveTo(-20, -16)
+    context.lineTo(0, 0)
+    context.lineTo(-20, 16)
+    context.fill()
+    context.restore()
+
   }
 })
 
@@ -370,7 +406,7 @@ animate()
 canvas.addEventListener('click', (event) => {
   var x = event.offsetX
   var y = event.offsetY
-  console.log(`x: ${x}, y: ${y}`);
+  console.log(`x: ${x}, y: ${y}`)
   debugBall.position = { x, y, z: 0 }
   debugBall.visible = true
 
@@ -383,4 +419,4 @@ canvas.addEventListener('click', (event) => {
   if (drawable) {
     console.log('drawable', drawable)
   }
-}, false);
+}, false)

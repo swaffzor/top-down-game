@@ -82,6 +82,15 @@ const animate = () => {
     holePointer.visible = false
   }
 
+  // draw a line down the middle of the screen
+  // context.strokeStyle = 'rgba(255, 255, 255, 0.5)'
+  // context.beginPath()
+  // context.moveTo(canvas.width / 2, 0)
+  // context.lineTo(canvas.width / 2, canvas.height)
+  // context.moveTo(0, canvas.height / 2)
+  // context.lineTo(canvas.width, canvas.height / 2)
+  // context.stroke()
+
   // detect if ball is off screen
   // if (ball.position) {
   //   ballPointer.visible = true
