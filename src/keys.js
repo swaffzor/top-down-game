@@ -1,4 +1,38 @@
 // file deepcode ignore DuplicateIfBody: <please specify a reason of ignoring this>
+
+let scale = 1; // Initial scale
+let offsetX = 0; // Initial x-offset
+let offsetY = 0; // Initial y-offset
+
+function setView() {
+  context.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+  console.log('setView', scale, offsetX, offsetY)
+}
+
+
+function zoomOut() {
+  const prevScale = scale; // Save the previous scale
+  scale /= 1.1; // Decrease the scale factor for zoom out
+
+  // Adjust the offsets
+  offsetX -= (1 - prevScale / scale);
+  offsetY -= (1 - prevScale / scale);
+
+  setView();
+}
+
+function zoomIn() {
+  const prevScale = scale; // Save the previous scale
+  scale *= 1.1; // Increase the scale factor to zoom in
+
+  // Adjust the offsets
+  offsetX += (1 - scale / prevScale);
+  offsetY += (1 - scale / prevScale);
+
+  setView();
+}
+
+
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 's':
@@ -175,8 +209,17 @@ window.addEventListener('keydown', (event) => {
       keys.c.pressed = true
       holePointer.visible = true
       lastKey = 'c'
-
       break
+    case ',':
+      zoomOut();
+      keys.comma.pressed = true
+      lastKey = ','
+      break;
+    case '.':
+      zoomIn();
+      keys.period.pressed = true
+      lastKey = '.'
+      break;
     default:
       break;
   }
@@ -284,6 +327,12 @@ window.addEventListener('keyup', (event) => {
       }, 3000)
       keys.c.pressed = false
       break
+    case ',':
+      keys.comma.pressed = false
+      break;
+    case '.':
+      keys.period.pressed = false
+      break;
 
     default:
       break;
@@ -360,6 +409,12 @@ const keys = {
   c: {
     pressed: false,
   },
+  comma: {
+    pressed: false,
+  },
+  period: {
+    pressed: false,
+  }
 }
 let lastKey = ''
 
