@@ -39,3 +39,13 @@ Me exploring game developing in vanilla HTML, CSS, and JavaScript
   - [] layer list with enable/disable toggles for drawables and movables
   - [] layer list with enable/disable toggles for collidables
   - [] color picker for stroke and fill
+
+## Club swing animation
+
+- the way the number 6 looks to me is close to the form of the swing if you were start the swing at the top of the 6
+  - this is a super stretch goal
+- the swing needs an air effect like a katana slicing through the air
+- impact with the ball should be emphasized with visible energy zapping out, maybe flash the screen for 1 frame too?
+- no idea on how to tie together with the character sprites
+  - i think keeping it as similar to a sword attack is going to afford a lot more reference material
+  - replacing the weapon with a golf club

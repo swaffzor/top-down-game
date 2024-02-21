@@ -91,13 +91,6 @@ const animate = () => {
   // context.lineTo(canvas.width, canvas.height / 2)
   // context.stroke()
 
-  // detect if ball is off screen
-  // if (ball.position) {
-  //   ballPointer.visible = true
-  // } else {
-  //   ballPointer.visible = false
-  // }
-
   if (isColliding(ball, hole)) {
     console.log('ball in hole')
     ball.visible = false

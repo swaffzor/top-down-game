@@ -146,17 +146,17 @@ let club = {
   loft: 0,
   name: '1',
   bag: {
-    1: { name: '1', max: 500, loft: 3, barHeightSpeed: 1, barAngleSpeed: 0.15 / 10 },
-    2: { name: '2', max: 450, loft: 5, barHeightSpeed: 1, barAngleSpeed: 0.14 / 10 },
-    3: { name: '3', max: 400, loft: 7, barHeightSpeed: 1.5, barAngleSpeed: 0.13 / 10 },
-    4: { name: '4', max: 350, loft: 10, barHeightSpeed: 1.5, barAngleSpeed: 0.12 / 10 },
-    5: { name: '5', max: 300, loft: 13, barHeightSpeed: 1, barAngleSpeed: 0.11 / 10 },
-    6: { name: '6', max: 250, loft: 16, barHeightSpeed: 1, barAngleSpeed: 0.10 / 10 },
-    7: { name: '7', max: 200, loft: 19, barHeightSpeed: 1.5, barAngleSpeed: 0.09 / 10 },
-    8: { name: '8', max: 150, loft: 22, barHeightSpeed: 1.5, barAngleSpeed: 0.08 / 10 },
-    9: { name: '9', max: 100, loft: 25, barHeightSpeed: 1, barAngleSpeed: 0.07 / 10 },
-    w: { name: 'w', max: 110, loft: 30, barHeightSpeed: 1.75, barAngleSpeed: 0.06 / 10 },
-    p: { name: 'p', max: 135, loft: 0, barHeightSpeed: 1.5, barAngleSpeed: 0.13 / 10 },
+    1: { name: '1', max: 500, loft: 3, barHeightSpeed: 5, barAngleSpeed: 0.15 / 5 },
+    2: { name: '2', max: 450, loft: 5, barHeightSpeed: 5, barAngleSpeed: 0.14 / 5 },
+    3: { name: '3', max: 400, loft: 7, barHeightSpeed: 5.5, barAngleSpeed: 0.13 / 5 },
+    4: { name: '4', max: 350, loft: 10, barHeightSpeed: 5.5, barAngleSpeed: 0.12 / 5 },
+    5: { name: '5', max: 300, loft: 13, barHeightSpeed: 5, barAngleSpeed: 0.11 / 5 },
+    6: { name: '6', max: 250, loft: 16, barHeightSpeed: 5, barAngleSpeed: 0.10 / 5 },
+    7: { name: '7', max: 200, loft: 19, barHeightSpeed: 5.5, barAngleSpeed: 0.09 / 5 },
+    8: { name: '8', max: 150, loft: 22, barHeightSpeed: 5.5, barAngleSpeed: 0.08 / 5 },
+    9: { name: '9', max: 100, loft: 25, barHeightSpeed: 5, barAngleSpeed: 0.07 / 5 },
+    w: { name: 'w', max: 110, loft: 30, barHeightSpeed: 5.75, barAngleSpeed: 0.06 / 5 },
+    p: { name: 'p', max: 135, loft: 0, barHeightSpeed: 5.5, barAngleSpeed: 0.13 / 5 },
   }
 }
 club = { ...club.bag[club.name], bag: { ...club.bag } }
@@ -207,7 +207,6 @@ const debugBall = new Collider({
 const camera = new Collider({
   name: 'camera',
   position: { x: canvas.width / 2 - 2, y: canvas.height / 2 - 2, z: 0 },
-  // position: { ...player.position },
   width: 4,
   height: 4,
   shape: 'rect',
@@ -225,8 +224,9 @@ const holePointer = new Collider({
   fillStyle: 'rgba(255, 255, 255, 1)',
   strokeStyle: 'rgba(255, 255, 255, 0.5)',
   renderMode: 'fill',
-  visible: true,
+  visible: false,
   customRender: () => {
+    if (!holePointer.visible) return
     context.fillStyle = holePointer.fillStyle
     context.strokeStyle = holePointer.strokeStyle
     const point2 = { x: hole.position.x + 8, y: hole.position.y + 5 }
@@ -297,6 +297,7 @@ const ballPointer = new Collider({
   renderMode: 'fill',
   visible: false,
   customRender: () => {
+    if (!ballPointer.visible) return
     context.fillStyle = ballPointer.fillStyle
     context.strokeStyle = ballPointer.strokeStyle
     const screenEdgePoint = getEdgePoint(camera.position, ball.position, canvas);
@@ -304,17 +305,22 @@ const ballPointer = new Collider({
 
     const deltaXB = pointBall.x - camera.position.x
     const deltaYB = pointBall.y - camera.position.y
+    const distanceToBall = Math.sqrt(deltaXB * deltaXB + deltaYB * deltaYB)
     const deltaXE = screenEdgePoint.x - camera.position.x
     const deltaYE = screenEdgePoint.y - camera.position.y
-    const distanceScreen = Math.sqrt(deltaXE * deltaXE + deltaYE * deltaYE)
-    const distanceToBall = Math.sqrt(deltaXB * deltaXB + deltaYB * deltaYB)
-    console.log('distanceToBall', distanceToBall, 'distanceScreen', distanceScreen)
+    const distanceScreen = Math.sqrt(deltaXE * deltaXE + deltaYE * deltaYE) * 3 / 4
     if (distanceToBall < distanceScreen) return
-
     const angleScreen = Math.atan2(deltaYE, deltaXE)
+
+    const deltaXSB = screenEdgePoint.x - ball.position.x
+    const deltaYSB = screenEdgePoint.y - ball.position.y
+    const distanceScreenToBall = Math.sqrt(deltaXSB * deltaXSB + deltaYSB * deltaYSB)
+    const scale = distanceScreen > distanceScreenToBall ? distanceScreen : distanceScreen + distanceScreenToBall
+    distanceScreen > distanceScreenToBall ? console.log('distanceScreenToBall', distanceScreenToBall) : console.log('distanceScreen', distanceScreen)
+
     const arrowStemEnd = {
-      x: camera.position.x + Math.cos(angleScreen) * 3 / 4 * distanceScreen,
-      y: camera.position.y + Math.sin(angleScreen) * 3 / 4 * distanceScreen,
+      x: camera.position.x + Math.cos(angleScreen) * scale,
+      y: camera.position.y + Math.sin(angleScreen) * scale,
     }
 
     context.save();
@@ -406,17 +412,15 @@ animate()
 canvas.addEventListener('click', (event) => {
   var x = event.offsetX
   var y = event.offsetY
-  console.log(`x: ${x}, y: ${y}`)
+  // get distance from x,y to camera
+  const deltaX = background.position.x - x
+  const deltaY = background.position.y - y
+  const angleInRadians = Math.atan2(deltaY, deltaX)
+  const mapX = background.position.x + Math.cos(angleInRadians)
+  const mapY = background.position.y + Math.sin(angleInRadians)
+  console.log(`canvas x: ${x}, y: ${y}`)
+  console.log(`map x: ${mapX}, y: ${mapY}`)
   debugBall.position = { x, y, z: 0 }
   debugBall.visible = true
 
-  const drawable = drawables.find(drawable => drawable.name !== debugBall.name && drawable?.name?.includes('boundary-') && isColliding(debugBall, drawable))
-  const boundary = boundaries.find(boundary => isColliding(debugBall, boundary))
-  if (boundary && boundary.name !== drawable.name) {
-    console.log('boundary', boundary)
-    boundary.fillStyle = 'rgba(255, 255, 255, 1)'
-  }
-  if (drawable) {
-    console.log('drawable', drawable)
-  }
 }, false)
