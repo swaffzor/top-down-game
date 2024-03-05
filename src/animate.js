@@ -5,6 +5,7 @@ const draw = () => {
 
   // debugDraw()
 }
+
 const animate = () => {
   draw()
 
@@ -35,12 +36,12 @@ const animate = () => {
   }
   // laser pointer controls
   if (keys.q.pressed) {
-    powerBar.rotation += .05
+    powerBar.angle += .05
     ballTarget.position.x = getDistanceX(powerBar)
     ballTarget.position.y = getDistanceY(powerBar)
   }
   if (keys.e.pressed) {
-    powerBar.rotation -= .05
+    powerBar.angle -= .05
     ballTarget.position.x = getDistanceX(powerBar)
     ballTarget.position.y = getDistanceY(powerBar)
   }
@@ -57,22 +58,22 @@ const animate = () => {
   // move "camera"
   if (keys.p.pressed) {
     cameraMovables.forEach(movable => {
-      movable.position.y += 1 * movable.scale
+      movable.position.y += (player.running ? RUN : STEP) * 2 * movable.scale
     })
   }
   if (keys.l.pressed) {
     cameraMovables.forEach(movable => {
-      movable.position.x += 1 * movable.scale
+      movable.position.x += (player.running ? RUN : STEP) * 2 * movable.scale
     })
   }
   if (keys.semicolon.pressed) {
     cameraMovables.forEach(movable => {
-      movable.position.y -= 1 * movable.scale
+      movable.position.y -= (player.running ? RUN : STEP) * 2 * movable.scale
     })
   }
   if (keys.apostrophe.pressed) {
     cameraMovables.forEach(movable => {
-      movable.position.x -= 1 * movable.scale
+      movable.position.x -= (player.running ? RUN : STEP) * 2 * movable.scale
     })
   }
 
@@ -91,7 +92,7 @@ const animate = () => {
   // context.lineTo(canvas.width, canvas.height / 2)
   // context.stroke()
 
-  if (isColliding(ball, hole)) {
+  if (isColliding(hole, ball)) {
     console.log('ball in hole')
     ball.visible = false
     ballShadow.visible = false
@@ -139,7 +140,7 @@ const animate = () => {
     ballPointer.visible = false
   }
 
-  // if (isColliding(ball, portalA) || isColliding(ball, portalB)) {
+  // if (isColliding(portalA, ball) || isColliding(portalB, ball)) {
   //   if (ball.direction === 'right') ball.position.x++
   //   if (ball.direction === 'left') ball.position.x--
   //   if (ball.direction === 'up') ball.position.y--
@@ -212,6 +213,23 @@ const tempAnimate = () => {
 }
 
 const animatePowerBar = () => {
+  context.save()
+  context.translate(powerBar.position.x, powerBar.position.y)
+  context.rotate(powerBar.angle)
+  const temp = powerBar.angle - 2 * Math.PI - Math.PI / 2
+  const bounds = .15
+
+  if (temp > holePointer.angle - bounds && temp < holePointer.angle + bounds) {
+    holePointer.strokeStyle = `rgba(0, ${255 * temp / holePointer.angle}, 0, 0.5)`
+    holePointer.fillStyle = `rgba(0, ${255 * temp / holePointer.angle}, 0, 0.5)`
+  }
+  else {
+    holePointer.strokeStyle = 'rgba(255, 255, 255, 0.5)'
+    holePointer.fillStyle = 'rgba(255, 255, 255, 0.5)'
+  }
+  context.fillRect(-powerBar.width / 2, 0, powerBar.width, -club.max)
+  context.restore()
+
   if (state.mode === 'powerBar') {
     // determine power of swing
     if (barDirection === 'grow') {
@@ -226,41 +244,39 @@ const animatePowerBar = () => {
   }
 
   if (state.mode === 'rotateBar') {
-    // console.log('rotating bar')
-    powerBar.rotation += barAngleSpeed
+    powerBar.angle += barAngleSpeed
     if (player.direction === 'down') {
-      if (powerBar.rotation < 3 * Math.PI + 1 * Math.PI / 4) {
+      if (powerBar.angle < 3 * Math.PI + 1 * Math.PI / 4) {
         barAngleSpeed = -barAngleSpeed;
       }
-      if (powerBar.rotation > 3 * Math.PI - 1 * Math.PI / 4) {
+      if (powerBar.angle > 3 * Math.PI - 1 * Math.PI / 4) {
         barAngleSpeed = -barAngleSpeed;
       }
     }
     if (player.direction === 'right') {
-      if (powerBar.rotation < 2 * Math.PI + Math.PI / 2 + Math.PI / 4) {
+      if (powerBar.angle < 2 * Math.PI + Math.PI / 2 + Math.PI / 4) {
         barAngleSpeed = -barAngleSpeed;
       }
-      if (powerBar.rotation > 2 * Math.PI + Math.PI / 2 - Math.PI / 4) {
+      if (powerBar.angle > 2 * Math.PI + Math.PI / 2 - Math.PI / 4) {
         barAngleSpeed = -barAngleSpeed;
       }
     }
     if (player.direction === 'up') {
-      if (powerBar.rotation < 7 * Math.PI / 4) {
+      if (powerBar.angle < 7 * Math.PI / 4) {
         barAngleSpeed = -barAngleSpeed;
       }
-      if (powerBar.rotation > 2 * Math.PI + 1 * Math.PI / 4) {
+      if (powerBar.angle > 2 * Math.PI + 1 * Math.PI / 4) {
         barAngleSpeed = -barAngleSpeed;
       }
     }
     if (player.direction === 'left') {
-      if (powerBar.rotation < 2 * Math.PI + 3 * Math.PI / 2 + Math.PI / 4) {
+      if (powerBar.angle < 2 * Math.PI + 3 * Math.PI / 2 + Math.PI / 4) {
         barAngleSpeed = -barAngleSpeed;
       }
-      if (powerBar.rotation > 2 * Math.PI + 3 * Math.PI / 2 - Math.PI / 4) {
+      if (powerBar.angle > 2 * Math.PI + 3 * Math.PI / 2 - Math.PI / 4) {
         barAngleSpeed = -barAngleSpeed;
       }
     }
-
   }
   powerBar.draw()
   // ballTarget.draw()
@@ -272,68 +288,79 @@ const animatePowerBar = () => {
   if (state.mode !== 'move') window.requestAnimationFrame(animatePowerBar)
 }
 
+const portalToPortal = (source, destination) => {
+  console.log('portaled')
+  const dx = source.position.x - ball.position.x
+  const dy = source.position.y - ball.position.y
+  ball.position = { x: destination.position.x - dx, y: destination.position.y - dy }
+  state.delta = { x: ball.position.x - dx, y: ball.position.y - dy }
+  state.portal = destination.name
+  state.ballVector = { distance: powerBar.height, angle: powerBar.angle }
+  dest.position = { x: destination.position.x, y: destination.position.y }
+  ballTarget.visible = true
+}
+
+let dest = { position: { x: 0, y: 0 }, angle: 0, height: 0 }
 const animateBall = () => {
-  if (state.portal !== "a" && isColliding(ball, portalA)) {
-    console.log('portaled')
-    portalB.rotation = powerBar.rotation
-    state.portal = "b"
-    ballTarget.visible = true
-    window.requestAnimationFrame(tempAnimate)
-    return
-    // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB)
-    // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB)
-  } else if (state.portal !== "b" && isColliding(ball, portalB)) {
-    console.log('portaled')
-    portalA.rotation = powerBar.rotation
-    state.portal = 'a'
-    ball.position.x = getDistanceX(portalA)
-    ball.position.y = getDistanceY(portalA)
-  } else {
-
-    // arc motion
-    const gravity = 2
-    const dz = (ballFrames * frame - 0.5 * gravity * Math.pow(frame, 2)) / ballFrames * powerBar.height / club.max
-    if (dz < 3 || club.loft < 3) {
-      ball.width = 3
-      ball.position.z = 0
-      ballShadow.position.x = ball.position.x - 3
-      ballShadow.position.y = ball.position.y - 3
-    } else if (dz > club.loft && club.loft > 3) {
-      ball.width = club.loft
-      ball.position.z = club.loft
-      ballShadow.position.x = ball.position.x - club.loft - 3
-      ballShadow.position.y = ball.position.y - club.loft - 3
-    } else {
-      ball.width = dz
-      ball.position.z = dz
-      ballShadow.position.x = ball.position.x - dz
-      ballShadow.position.y = ball.position.y - dz
-    }
-    ballShadow.fillStyle = `rgba(0, 0, 0, ${0.5 - dz / 100})`
-
-    // planar motion
-    switch (state.portal) {
-      case 'a':
-        // ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalA, frame / ballFrames)
-        // ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalA, frame / ballFrames)
-        break;
-      case 'b':
-        // ball.position.x = portalB.position.x + portalB.width - ball.position.x + getDistanceX(portalB, frame / ballFrames)
-        // ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalB, frame / ballFrames)
-        break;
-      case '':
-      default:
-        if (isMovePossible({ ...ball, position: { x: ball.position.x + 1, y: ball.position.y + 1, z: ball.position.z } })) {
-          const dx = getDistanceX(powerBar, frame / ballFrames)
-          const dy = getDistanceY(powerBar, frame / ballFrames)
-          state.delta = { x: ball.position.x - dx, y: ball.position.y - dy }
-          ball.position.x = dx
-          ball.position.y = dy
-        } else {
-
-        }
-    }
+  if (state.portal === "" && isColliding(portalA, ball)) {
+    portalToPortal(portalA, portalB)
+    // window.requestAnimationFrame(tempAnimate)
+    // return
+  } else if (state.portal === "" && isColliding(portalB, ball)) {
+    portalToPortal(portalB, portalA)
+    // return
   }
+
+  // arc motion
+  const gravity = 3
+  const dz = (ballFrames * frame - 0.5 * gravity * Math.pow(frame, 2)) / ballFrames * powerBar.height / club.max
+  if (dz < 3 || club.loft < 3) {
+    ball.width = 3
+    ball.position.z = 0
+    ballShadow.position.x = ball.position.x - 3
+    ballShadow.position.y = ball.position.y - 3
+    // } else if (dz > club.loft && club.loft > 3) {
+    //   ball.width = club.loft
+    //   ball.position.z = club.loft
+    //   ballShadow.position.x = ball.position.x - club.loft - 3
+    //   ballShadow.position.y = ball.position.y - club.loft - 3
+  } else {
+    ball.width = dz
+    ball.position.z = dz
+    ballShadow.position.x = ball.position.x - dz
+    ballShadow.position.y = ball.position.y - dz
+  }
+  ballShadow.fillStyle = `rgba(0, 0, 0, ${0.5 - dz / ballFrames})`
+
+  // planar motion
+  // case 'a':
+  //   ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalA, frame / ballFrames)
+  //   ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalA, frame / ballFrames)
+  //   break;
+  // case 'b':
+  //   ball.position.x = portalB.position.x + portalB.width - ball.position.x + getDistanceX(portalB, frame / ballFrames)
+  //   ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalB, frame / ballFrames)
+  //   break;
+  // case '':
+  const tempBall = { ...ball, x: ball.position.x + 1, y: ball.position.y + 1, z: ball.position.z }
+  if (isMovePossible(tempBall)) {
+    const temp = {
+      ...powerBar,
+      position: {
+        x: portalA.position.x + portalA.width - ball.position.x,
+        y: portalA.position.y + portalA.height - ball.position.y
+      }
+    }
+    const dx = getDistanceX(powerBar, frame / ballFrames)
+    const dy = getDistanceY(powerBar, frame / ballFrames)
+    state.delta = { x: ball.position.x - dx, y: ball.position.y - dy }
+    ball.position.x = dx
+    ball.position.y = dy
+  } else {
+    console.log('move not possible')
+    state.delta = { x: 0, y: 0 }
+  }
+
 
   cameraMovables.forEach(movable => {
     movable.position.x += state.delta.x * movable.scale
@@ -344,7 +371,7 @@ const animateBall = () => {
     frame++
     window.requestAnimationFrame(animateBall)
   } else {
-    state.portal = ""
+    state.camera = 'player'
     ballTarget.visible = false
     frame = 0
     ballFrames = MAX_BALL_FRAMES
@@ -353,8 +380,8 @@ const animateBall = () => {
 }
 
 const animateBackToPlayer = () => {
-  const dx = camera.position.x - player.position.x
-  const dy = camera.position.y - player.position.y
+  const dx = camera.position.x + 2 - player.position.x - 8
+  const dy = camera.position.y - 2 - player.position.y - 4
   const distance = Math.sqrt(dx * dx + dy * dy)
   const angle = Math.atan2(dy, dx)
 
@@ -367,16 +394,17 @@ const animateBackToPlayer = () => {
     movable.position.y += state.delta.y * movable.scale * frame / ballFrames
   })
 
-  if (frame < ballFrames && (Math.abs(dx) > 1 && Math.abs(dy) > 1)) {
+  if (frame < ballFrames && (Math.abs(dx) > 0 && Math.abs(dy) > 0)) {
     frame++
     window.requestAnimationFrame(animateBackToPlayer)
   } else {
     frame = 0
+    state.delta = { x: 0, y: 0 }
   }
 }
 
-const getDistanceX = (boundary, percent = 1) => boundary.position.x + Math.cos(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.width / 4
-const getDistanceY = (boundary, percent = 1) => boundary.position.y + Math.sin(boundary.rotation - Math.PI / 2) * percent * boundary.height + ball.height / 4
+const getDistanceX = (boundary, percent = 1) => boundary.position.x + Math.cos(boundary.angle - Math.PI / 2) * percent * boundary.height + ball.width / 4
+const getDistanceY = (boundary, percent = 1) => boundary.position.y + Math.sin(boundary.angle - Math.PI / 2) * percent * boundary.height + ball.height / 4
 
 const getDistanceBetween = (pointA, pointB) => {
   const dx = pointA.x - pointB.x
