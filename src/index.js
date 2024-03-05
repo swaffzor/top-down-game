@@ -5,8 +5,37 @@ const context = canvas.getContext("2d")
 canvas.width = 1150  //* 16
 canvas.height = 600 //* 9
 
-const initMapPos = { x: canvas.width / 6 - 150, y: -2300 }
-const background = new Sprite({ name: 'background', image: './sprites/golf-course-test.png', position: initMapPos, scale: 1 })
+// 303 is start
+// 304 is portal
+// 607 is hole
+const metaLayer = meta.layers.find(layer => layer.name === 'meta').data
+const playerStartIndex = metaLayer.findIndex(cell => cell === 303)
+const portalIndexes = metaLayer.map((cell, index) => cell === 304 ? index : null).filter(cell => cell !== null)
+const holeIndex = metaLayer.findIndex(cell => cell === 607)
+const canvasscale = 1;
+
+const levelStart = {
+  x: (-playerStartIndex % meta.width * meta.tilewidth + canvas.width / 2) * canvasscale,
+  y: (-playerStartIndex / meta.height) * meta.tileheight + canvas.height / 2 * canvasscale,
+};
+
+const holeStart = {
+  x: holeIndex % meta.width * meta.tilewidth * canvasscale + levelStart.x,
+  y: Math.floor(holeIndex / meta.height) * meta.tileheight * canvasscale + levelStart.y,
+};
+
+const portalStarts = portalIndexes.map(index => {
+  return {
+    x: index % meta.width * meta.tilewidth * canvasscale,
+    y: Math.floor(index / meta.height) * meta.tileheight * canvasscale,
+  }
+})
+
+const cameraStart = { x: canvas.width / 2 - 2, y: canvas.height / 2 - 2, z: 0 }
+
+const background = new Sprite({ name: 'background', image: './sprites/hole1.png', position: levelStart, scale: 1 })
+// const initMapPos = { x: -levelStart.x + canvas.width / 2, y: -levelStart.y + canvas.height / 2 }
+// const initMapPos = { x: canvas.width / 6 - 375, y: -1200 }
 // const foreground = new Sprite({ name: 'foreground', image: './sprites/test-map-foreground.png', position: initMapPos, scale: 0.5 })
 
 const spriteCount = 6
@@ -32,17 +61,36 @@ playerIdleRight.src = './sprites/alex/idle_right.png'
 const portalA = new Sprite({
   name: 'portalA',
   image: './sprites/portal3.png',
-  position: { x: 250, y: 350, z: 20 },
+  position: {
+    x: portalStarts[1].x + levelStart.x - 500,
+    y: portalStarts[1].y + levelStart.y,
+  },
   frames: { max: 7 },
+  rotation: 0,
 })
 
 const portalB = new Sprite({
   name: 'portalB',
   image: './sprites/portal3.png',
-  position: { x: 230, y: 150, z: 20 },
+  position: {
+    x: portalStarts[1].x + levelStart.x - 800,
+    y: portalStarts[1].y + levelStart.y,
+  },
   frames: { max: 7 },
+  rotation: 0,
 })
 
+const camera = new Collider({
+  name: 'camera',
+  position: cameraStart,
+  // position: holeStart,
+  width: 4,
+  height: 4,
+  shape: 'rect',
+  visible: true,
+  fillStyle: 'rgba(255, 255, 0, 1)',
+  strokeStyle: 'rgba(255, 255, 0, 1)',
+})
 
 const powerBar = new Collider({
   name: 'powerBar',
@@ -67,7 +115,6 @@ const clubRadius = new Collider({
   visible: false,
 })
 
-
 const player = new Sprite({
   name: 'player',
   image: './sprites/alex/idle_down.png',
@@ -90,18 +137,20 @@ const player = new Sprite({
     idleLeft: playerIdleLeft,
     idleRight: playerIdleRight,
   },
+  visible: false,
   onLoad: (width, height) => {
     powerBar.position = { x: camera.position.x + 2, y: camera.position.y + 2 }
     clubRadius.position = { x: player.position.x + width / 2, y: player.position.y + height / 2 }
   }
 })
+// player.visible = false
 
 const hole = new Sprite({
   name: 'hole',
   image: './sprites/hole.png',
-  // position: { x: player.position.x, y: player.position.y - 500, z: 0 },
-  // position: { x: 650, y: 2300, z: 0 },
-  position: { x: Math.random() * 2000, y: Math.random() * 1000 - 500, z: 0 },
+  position: holeStart,
+  // position: { x: canvas.width - 100, y: -900, z: 0 },
+  // position: { x: Math.random() * 2000, y: Math.random() * 1000 - 500, z: 0 },
   frames: { max: 1 },
   width: 15,
   height: 10,
@@ -146,17 +195,17 @@ let club = {
   loft: 0,
   name: '1',
   bag: {
-    1: { name: '1', max: 500, loft: 3, barHeightSpeed: 5, barAngleSpeed: 0.15 / 5 },
-    2: { name: '2', max: 450, loft: 5, barHeightSpeed: 5, barAngleSpeed: 0.14 / 5 },
-    3: { name: '3', max: 400, loft: 7, barHeightSpeed: 5.5, barAngleSpeed: 0.13 / 5 },
-    4: { name: '4', max: 350, loft: 10, barHeightSpeed: 5.5, barAngleSpeed: 0.12 / 5 },
-    5: { name: '5', max: 300, loft: 13, barHeightSpeed: 5, barAngleSpeed: 0.11 / 5 },
-    6: { name: '6', max: 250, loft: 16, barHeightSpeed: 5, barAngleSpeed: 0.10 / 5 },
-    7: { name: '7', max: 200, loft: 19, barHeightSpeed: 5.5, barAngleSpeed: 0.09 / 5 },
-    8: { name: '8', max: 150, loft: 22, barHeightSpeed: 5.5, barAngleSpeed: 0.08 / 5 },
-    9: { name: '9', max: 100, loft: 25, barHeightSpeed: 5, barAngleSpeed: 0.07 / 5 },
-    w: { name: 'w', max: 110, loft: 30, barHeightSpeed: 5.75, barAngleSpeed: 0.06 / 5 },
-    p: { name: 'p', max: 135, loft: 0, barHeightSpeed: 5.5, barAngleSpeed: 0.13 / 5 },
+    1: { name: '1', max: 500 * 1.25, loft: 3, barHeightSpeed: 5, barAngleSpeed: 0.15 / 5 },
+    2: { name: '2', max: 450 * 1.25, loft: 5, barHeightSpeed: 5, barAngleSpeed: 0.14 / 5 },
+    3: { name: '3', max: 400 * 1.25, loft: 7, barHeightSpeed: 5.5, barAngleSpeed: 0.13 / 5 },
+    4: { name: '4', max: 350 * 1.25, loft: 10, barHeightSpeed: 5.5, barAngleSpeed: 0.12 / 5 },
+    5: { name: '5', max: 300 * 1.25, loft: 13, barHeightSpeed: 5, barAngleSpeed: 0.11 / 5 },
+    6: { name: '6', max: 250 * 1.25, loft: 16, barHeightSpeed: 5, barAngleSpeed: 0.10 / 5 },
+    7: { name: '7', max: 200 * 1.25, loft: 19, barHeightSpeed: 5.5, barAngleSpeed: 0.09 / 5 },
+    8: { name: '8', max: 150 * 1.25, loft: 22, barHeightSpeed: 5.5, barAngleSpeed: 0.08 / 5 },
+    9: { name: '9', max: 100 * 1.25, loft: 25, barHeightSpeed: 5, barAngleSpeed: 0.07 / 5 },
+    w: { name: 'w', max: 110 * 1.25, loft: 30, barHeightSpeed: 5.75, barAngleSpeed: 0.06 / 5 },
+    p: { name: 'p', max: 135 * 1.25, loft: 0, barHeightSpeed: 5.5, barAngleSpeed: 0.13 / 5 },
   }
 }
 club = { ...club.bag[club.name], bag: { ...club.bag } }
@@ -201,17 +250,6 @@ const debugBall = new Collider({
   shape: 'circle',
   visible: false,
   fillStyle: 'rgba(255, 255, 0, 0.8)',
-  strokeStyle: 'rgba(255, 255, 0, 1)',
-})
-
-const camera = new Collider({
-  name: 'camera',
-  position: { x: canvas.width / 2 - 2, y: canvas.height / 2 - 2, z: 0 },
-  width: 4,
-  height: 4,
-  shape: 'rect',
-  visible: true,
-  fillStyle: 'rgba(255, 255, 0, 1)',
   strokeStyle: 'rgba(255, 255, 0, 1)',
 })
 
@@ -260,6 +298,8 @@ const holePointer = new Collider({
     context.lineTo(-10, 5)
     context.fill()
     context.restore()
+    holePointer.angle = angleInRadians
+    holePointer.height = distance
   }
 })
 
@@ -316,7 +356,6 @@ const ballPointer = new Collider({
     const deltaYSB = screenEdgePoint.y - ball.position.y
     const distanceScreenToBall = Math.sqrt(deltaXSB * deltaXSB + deltaYSB * deltaYSB)
     const scale = distanceScreen > distanceScreenToBall ? distanceScreen : distanceScreen + distanceScreenToBall
-    distanceScreen > distanceScreenToBall ? console.log('distanceScreenToBall', distanceScreenToBall) : console.log('distanceScreen', distanceScreen)
 
     const arrowStemEnd = {
       x: camera.position.x + Math.cos(angleScreen) * scale,
@@ -391,13 +430,14 @@ let state = {
   strokes: 0,
   portal: '',
   delta: { ...ball.position },
+  ballVector: { magnitude: 0, angle: 0 },
 }
 
 
 const STEP = 1
 const RUN = 2
 const OFFSET = 0
-const MAX_BALL_FRAMES = 100
+const MAX_BALL_FRAMES = 200
 let barDirection = ''
 let barHeightSpeed = 2
 let barAngleSpeed = 0.05
