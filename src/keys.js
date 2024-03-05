@@ -34,32 +34,27 @@ function zoomIn() {
 
 
 window.addEventListener('keydown', (event) => {
+  lastKey = event.key
   switch (event.key) {
     case 's':
       keys.s.pressed = true
-      lastKey = 's'
       break;
     case 'w':
       keys.w.pressed = true
-      lastKey = 'w'
       break;
     case 'a':
       keys.a.pressed = true
-      lastKey = 'a'
       break;
     case 'd':
       keys.d.pressed = true
-      lastKey = 'd'
       break;
     case 'j':
       keys.j.pressed = true
       player.jumping = 1
-      lastKey = 'j'
       break;
     case 'k':
       keys.k.pressed = true
       player.running = true
-      lastKey = 'k'
       break
     case 'Enter':
       keys.enter.pressed = true
@@ -67,89 +62,92 @@ window.addEventListener('keydown', (event) => {
         ballTarget.visible = true
         barDirection = 'grow'
         state.mode = 'rotateBar'
+        powerBar.visible = false
         barAngleSpeed = club.barAngleSpeed
         if (player.direction === 'up' && powerBar.direction !== 'up') {
-          powerBar.rotation = 2 * Math.PI // starting at 2PI to avoid jittering when rotating back to 0
+          powerBar.angle = 2 * Math.PI // starting at 2PI to avoid jittering when rotating back to 0
           powerBar.direction = 'up'
+          // powerBar.angle = 0
         }
         if (player.direction === 'right' && powerBar.direction !== 'right') {
-          powerBar.rotation = 2 * Math.PI + Math.PI / 2
+          powerBar.angle = 2 * Math.PI + Math.PI / 2
           powerBar.direction = 'right'
+          // powerBar.angle = Math.PI / 2
         }
         if (player.direction === 'down' && powerBar.direction !== 'down') {
-          powerBar.rotation = 2 * Math.PI + Math.PI
+          powerBar.angle = 2 * Math.PI + Math.PI
           powerBar.direction = 'down'
+          // powerBar.angle = Math.PI
         }
         if (player.direction === 'left' && powerBar.direction !== 'left') {
-          powerBar.rotation = 2 * Math.PI + 3 * Math.PI / 2
+          powerBar.angle = 2 * Math.PI + 3 * Math.PI / 2
           powerBar.direction = 'left'
+          // powerBar.angle = 3 * Math.PI / 2
         }
         powerBar.height = club.max
         window.requestAnimationFrame(animatePowerBar)
       } else if (state.mode === 'rotateBar') {
+        powerBar.visible = true
         barHeightSpeed = club.barHeightSpeed
         state.mode = 'powerBar'
+        powerBar.height = 0
       } else if (state.mode === 'powerBar') {
         ballFrames = MAX_BALL_FRAMES * powerBar.height / club.max
         state.strokes++
+        // state.portal = ""
         state.mode = 'move'
+        state.camera = 'ball'
         window.requestAnimationFrame(animateBall)
       }
-      lastKey = 'Enter'
       break
     case 'Escape':
-      if (state.mode === 'powerBar') {
+      if (state.camera === 'free') {
+        window.requestAnimationFrame(animateBackToPlayer)
+        state.camera = 'player'
+      } else if (state.mode === 'powerBar') {
+        powerBar.visible = false
         state.mode = 'rotateBar'
       } else if (state.mode === 'rotateBar') {
+        powerBar.visible = true
         state.mode = 'move'
       }
-      lastKey = 'Escape'
       break
     case 't':
       keys.t.pressed = true
-      lastKey = 't'
       break
     case 'g':
       keys.g.pressed = true
-      lastKey = 'g'
       break
     case 'f':
       keys.f.pressed = true
-      lastKey = 'f'
       break
     case 'h':
       keys.h.pressed = true
-      lastKey = 'h'
       break
     case 'q':
       timeOutValue && clearTimeout(timeOutValue)
       ballTarget.visible = true
       keys.q.pressed = true
-      lastKey = 'q'
       break
     case 'e':
       timeOutValue && clearTimeout(timeOutValue)
       ballTarget.visible = true
       keys.e.pressed = true
-      lastKey = 'e'
       break
     case 'u':
       timeOutValue && clearTimeout(timeOutValue)
       ballTarget.visible = true
       keys.u.pressed = true
-      lastKey = 'u'
       break
     case 'i':
       timeOutValue && clearTimeout(timeOutValue)
       ballTarget.visible = true
       keys.i.pressed = true
-      lastKey = 'i'
       break
     case 'o':
       frame = 0
       window.requestAnimationFrame(animateBall)
       keys.o.pressed = true
-      lastKey = 'o'
       break
     case 'n':
       // club selection
@@ -168,7 +166,6 @@ window.addEventListener('keydown', (event) => {
       clubRadius.visible = true
       clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
       clubRadius.width = club.max
-      lastKey = 'n'
       break
     case 'm':
       // club selection
@@ -187,38 +184,38 @@ window.addEventListener('keydown', (event) => {
       clubRadius.visible = true
       clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
       clubRadius.width = club.max
-      lastKey = 'm'
       break
     case 'p':
       keys.p.pressed = true
-      lastKey = 'p'
+      state.camera = 'free'
       break
     case 'l':
       keys.l.pressed = true
-      lastKey = 'l'
+      state.camera = 'free'
       break
     case ";":
       keys.semicolon.pressed = true
-      lastKey = ';'
+      state.camera = 'free'
       break
     case "'":
       keys.apostrophe.pressed = true
-      lastKey = "'"
+      state.camera = 'free'
       break
     case 'c':
       keys.c.pressed = true
       holePointer.visible = true
-      lastKey = 'c'
       break
     case ',':
       zoomOut();
       keys.comma.pressed = true
-      lastKey = ','
       break;
     case '.':
       zoomIn();
       keys.period.pressed = true
-      lastKey = '.'
+      break;
+    case 'Shift':
+      player.running = true
+      keys.shift.pressed = true
       break;
     default:
       break;
@@ -235,6 +232,7 @@ const eraseClubRadius = () => {
 }
 
 const eraseBallTarget = () => {
+  if (state.mode !== 'move') return
   timeOutValue = setTimeout(() => {
     ballTarget.visible = false
     console.log('erased ballTarget')
@@ -333,6 +331,10 @@ window.addEventListener('keyup', (event) => {
     case '.':
       keys.period.pressed = false
       break;
+    case 'Shift':
+      player.running = false
+      keys.shift.pressed = false
+      break;
 
     default:
       break;
@@ -414,7 +416,9 @@ const keys = {
   },
   period: {
     pressed: false,
-  }
+  },
+  shift: {
+    pressed: false,
+  },
 }
-let lastKey = ''
 

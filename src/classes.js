@@ -102,7 +102,7 @@ class Collider {
     this.direction = ''
     this.visible = visible
     this.time = 0
-    this.rotation = 0
+    this.angle = 0
     this.name = name
     this.render = render
     this.strokeStyle = strokeStyle
@@ -111,34 +111,34 @@ class Collider {
   }
 
   draw() {
-    const visible = this.visible ? 1 : 0
+    if (!this.visible) return
     context.fillStyle = this.fillStyle
     context.strokeStyle = this.strokeStyle
 
-    if (this.rotation > 0) {
-      context.save();
-      context.translate(this.position.x, this.position.y);
-      context.rotate(this.rotation);
+    if (this.angle > 0) {
+      context.save()
+      context.translate(this.position.x, this.position.y)
+      context.rotate(this.angle)
       if (this.shape === 'rect') {
-        context.fillRect(0, -this.height, this.width * visible, this.height)
-        context.strokeRect(0, -this.height, this.width * visible, this.height)
+        context.fillRect(-this.width / 2, -this.height, this.width, this.height)
+        // context.strokeRect(0, -this.height, this.width , this.height)
       } else if (this.shape === 'circle') {
         context.beginPath()
-        context.arc(0, 0, this.width * visible, 0, 2 * Math.PI)
+        context.arc(0, 0, this.width, 0, 2 * Math.PI)
         context.fill()
         context.stroke()
       }
-      context.restore();
+      context.restore()
     } else if (this.shape === 'rect') {
-      context.fillRect(this.position.x, this.position.y, this.width * visible, this.height)
-      context.strokeRect(this.position.x, this.position.y, this.width * visible, this.height)
+      context.fillRect(this.position.x, this.position.y, this.width, this.height)
+      context.strokeRect(this.position.x, this.position.y, this.width, this.height)
     } else if (this.shape === 'circle') {
       context.beginPath()
-      context.arc(this.position.x, this.position.y, this.width * visible, 0, 2 * Math.PI)
+      context.arc(this.position.x, this.position.y, this.width, 0, 2 * Math.PI)
       context.fill()
       context.stroke()
     } else if (this.shape === 'custom') {
-      this.visible && this.customRender()
+      this.customRender()
     }
     // draw a border around the boundary
     // context.strokeStyle = 'rgba(255, 0, 0, 0.5)'
