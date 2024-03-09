@@ -62,7 +62,7 @@ const portalA = new Sprite({
   name: 'portalA',
   image: './sprites/portal3.png',
   position: {
-    x: portalStarts[1].x + levelStart.x - 500,
+    x: portalStarts[1].x + levelStart.x,
     y: portalStarts[1].y + levelStart.y,
   },
   frames: { max: 7 },
@@ -73,8 +73,8 @@ const portalB = new Sprite({
   name: 'portalB',
   image: './sprites/portal3.png',
   position: {
-    x: portalStarts[1].x + levelStart.x - 800,
-    y: portalStarts[1].y + levelStart.y,
+    x: portalStarts[0].x + levelStart.x,
+    y: portalStarts[0].y + levelStart.y,
   },
   frames: { max: 7 },
   rotation: 0,
@@ -424,6 +424,8 @@ let drawables = [
   ballPointer,
 ]
 
+let portals = [portalA, portalB]
+
 let state = {
   mode: 'move',
   par: 3,
@@ -449,17 +451,18 @@ let radiusTimeout = 0
 
 animate()
 
+const mouse = {
+  x: 0,
+  y: 0
+}
+window.addEventListener('mousemove', (event) => {
+  mouse.x = event.x
+  mouse.y = event.y
+})
 canvas.addEventListener('click', (event) => {
   var x = event.offsetX
   var y = event.offsetY
-  // get distance from x,y to camera
-  const deltaX = background.position.x - x
-  const deltaY = background.position.y - y
-  const angleInRadians = Math.atan2(deltaY, deltaX)
-  const mapX = background.position.x + Math.cos(angleInRadians)
-  const mapY = background.position.y + Math.sin(angleInRadians)
-  console.log(`canvas x: ${x}, y: ${y}`)
-  console.log(`map x: ${mapX}, y: ${mapY}`)
+  console.log(`click x: ${x}, y: ${y}`)
   debugBall.position = { x, y, z: 0 }
   debugBall.visible = true
 

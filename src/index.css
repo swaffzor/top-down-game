@@ -53,6 +53,7 @@ body {
 
 .score {
   text-align: end;
+  color: white;
   &.container {
     position: absolute;
     top: 0;

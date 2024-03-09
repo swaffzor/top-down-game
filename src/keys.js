@@ -85,7 +85,7 @@ window.addEventListener('keydown', (event) => {
           // powerBar.angle = 3 * Math.PI / 2
         }
         powerBar.height = club.max
-        window.requestAnimationFrame(animatePowerBar)
+        animationLoop = window.requestAnimationFrame(animatePowerBar)
       } else if (state.mode === 'rotateBar') {
         powerBar.visible = true
         barHeightSpeed = club.barHeightSpeed
@@ -97,12 +97,12 @@ window.addEventListener('keydown', (event) => {
         // state.portal = ""
         state.mode = 'move'
         state.camera = 'ball'
-        window.requestAnimationFrame(animateBall)
+        animationLoop = window.requestAnimationFrame(animateBall)
       }
       break
     case 'Escape':
       if (state.camera === 'free') {
-        window.requestAnimationFrame(animateBackToPlayer)
+        animationLoop = window.requestAnimationFrame(animateBackToPlayer)
         state.camera = 'player'
       } else if (state.mode === 'powerBar') {
         powerBar.visible = false
@@ -146,7 +146,7 @@ window.addEventListener('keydown', (event) => {
       break
     case 'o':
       frame = 0
-      window.requestAnimationFrame(animateBall)
+      animationLoop = window.requestAnimationFrame(animateBall)
       keys.o.pressed = true
       break
     case 'n':

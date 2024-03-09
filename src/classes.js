@@ -20,7 +20,7 @@ class Sprite {
     this.image.onload = () => {
       this.width = width ?? this.image.width / this.frames.max
       this.height = this.image.height
-      console.log(this.image.src, `${this.width}x${this.height}`)
+      // console.log(this.image.src, `${this.width}x${this.height}`)
       onLoad && onLoad(this.width, this.height)
     }
     this.moving = false

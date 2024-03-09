@@ -1,3 +1,6 @@
+let animationLoop
+let secondaryLoop
+
 const draw = () => {
   context.fillStyle = "#0099cc" // ocean blue
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -6,7 +9,11 @@ const draw = () => {
   // debugDraw()
 }
 
-const animate = () => {
+let lastTime = 0
+const animate = (timeStamp) => {
+  const deltaTime = timeStamp - lastTime
+  lastTime = timeStamp
+
   draw()
 
   if (keys.w.pressed) {
@@ -140,20 +147,18 @@ const animate = () => {
     ballPointer.visible = false
   }
 
-  // if (isColliding(portalA, ball) || isColliding(portalB, ball)) {
-  //   if (ball.direction === 'right') ball.position.x++
-  //   if (ball.direction === 'left') ball.position.x--
-  //   if (ball.direction === 'up') ball.position.y--
-  //   if (ball.direction === 'down') ball.position.y++
-  //   console.log('adjusting ball')
-  //   ballShadow.position = { ...ball.position, y: ball.position.y + 3 }
-  // }
+  if (state.portal === "" && isColliding(portalA, ball)) {
+    portalToPortal(portalA, portalB)
+    // animation = window.requestAnimationFrame(tempAnimate)
+  } else if (state.portal === "" && isColliding(portalB, ball)) {
+    portalToPortal(portalB, portalA)
+  }
 
   document.getElementById('stat1').innerHTML = `<strong> Par ${state.par} | Strokes ${state.strokes}</strong > `
   document.getElementById('stat2').innerHTML = `<strong> Club: ${parseInt(club.name) ? club.name + ' Iron' : club.name === 'w' ? 'Wedge' : 'Putter'}</strong > <br /> Ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}, w: ${Math.floor(ball.width)} `
   document.getElementById('stat3').innerHTML = `<pre> ${JSON.stringify({ club: { name: club.name, max: club.max, loft: club.loft }, frame, ballFrames, ...{ state }, }, null, 2)}</pre > `
 
-  window.requestAnimationFrame(animate)
+  animationLoop = window.requestAnimationFrame(animate)
 }
 
 
@@ -203,13 +208,13 @@ const tempAnimate = () => {
     case 10:
       ball.fillStyle = 'rgba(255, 255, 255, 1)'
       ballTarget.fillStyle = 'rgba(255, 0, 0, 1)'
-      window.requestAnimationFrame(animateBall)
+      secondaryLoop = window.requestAnimationFrame(animateBall)
       break;
     default:
       break;
   }
   tempshit++
-  if (tempshit <= 11) window.requestAnimationFrame(tempAnimate)
+  if (tempshit <= 11) secondaryLoop = window.requestAnimationFrame(tempAnimate)
 }
 
 const animatePowerBar = () => {
@@ -285,32 +290,61 @@ const animatePowerBar = () => {
   ballTarget.position.x = getDistanceX(powerBar) //+ barDirection === 'grow' ? ball.width : -ball.width
   ballTarget.position.y = getDistanceY(powerBar) //+ barDirection === 'grow' ? ball.height : -ball.height
 
-  if (state.mode !== 'move') window.requestAnimationFrame(animatePowerBar)
+  if (state.mode !== 'move') secondaryLoop = window.requestAnimationFrame(animatePowerBar)
 }
 
 const portalToPortal = (source, destination) => {
-  console.log('portaled')
-  const dx = source.position.x - ball.position.x
-  const dy = source.position.y - ball.position.y
-  ball.position = { x: destination.position.x - dx, y: destination.position.y - dy }
-  state.delta = { x: ball.position.x - dx, y: ball.position.y - dy }
+  console.log('portal from', source.name, 'to', destination.name)
+  const dx = ball.position.x - source.position.x
+  const dy = ball.position.y - source.position.y
+  ball.position = { x: destination.position.x + dx, y: destination.position.y + dy, z: ball.position.z }
   state.portal = destination.name
-  state.ballVector = { distance: powerBar.height, angle: powerBar.angle }
-  dest.position = { x: destination.position.x, y: destination.position.y }
-  ballTarget.visible = true
+  // debugBall.position.x = getDistanceX(powerBar)
+  // debugBall.position.y = getDistanceY(powerBar)
+  // debugBall.visible = true
+
+  state.frame = frame
+  state.frameLimit = ballFrames
+  state.animation = animateBall
+  ballFrames = MAX_BALL_FRAMES
+  frame = 0
+  cancelAnimationFrame(secondaryLoop)
+  state.destination = ball
+  secondaryLoop = window.requestAnimationFrame(animateCameraTo)
 }
 
-let dest = { position: { x: 0, y: 0 }, angle: 0, height: 0 }
-const animateBall = () => {
-  if (state.portal === "" && isColliding(portalA, ball)) {
-    portalToPortal(portalA, portalB)
-    // window.requestAnimationFrame(tempAnimate)
-    // return
-  } else if (state.portal === "" && isColliding(portalB, ball)) {
-    portalToPortal(portalB, portalA)
-    // return
-  }
+const moveCameraTo = (destination) => {
+  // console.log('move camera to', destination.name)
+  cameraMovables.forEach(movable => {
+    movable.position.x += destination.x * movable.scale
+    movable.position.y += destination.y * movable.scale
+  })
+}
 
+const animateCameraTo = () => {
+  const destination = state.destination
+  // console.log('animate camera to', destination.name)
+
+  const dx = camera.position.x - destination.position.x
+  const dy = camera.position.y - destination.position.y
+  const distance = Math.sqrt(dx * dx + dy * dy) * frame / ballFrames
+  const angle = Math.atan2(dy, dx)
+  const newX = Math.cos(angle) * distance
+  const newY = Math.sin(angle) * distance
+
+  moveCameraTo({ x: newX, y: newY })
+
+  if (frame < ballFrames && (Math.abs(dx) > 5 && Math.abs(dy) > 5)) {
+    frame++
+    secondaryLoop = window.requestAnimationFrame(animateCameraTo)
+  } else {
+    frame = state.frame
+    ballFrames = state.frameLimit
+    secondaryLoop = window.requestAnimationFrame(state.animation)
+  }
+}
+
+const animateBall = () => {
   // arc motion
   const gravity = 3
   const dz = (ballFrames * frame - 0.5 * gravity * Math.pow(frame, 2)) / ballFrames * powerBar.height / club.max
@@ -342,40 +376,57 @@ const animateBall = () => {
   //   ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalB, frame / ballFrames)
   //   break;
   // case '':
+
   const tempBall = { ...ball, x: ball.position.x + 1, y: ball.position.y + 1, z: ball.position.z }
+  let newPosition = { x: 0, y: 0 }
   if (isMovePossible(tempBall)) {
     const temp = {
-      ...powerBar,
-      position: {
-        x: portalA.position.x + portalA.width - ball.position.x,
-        y: portalA.position.y + portalA.height - ball.position.y
-      }
+      height: powerBar.height,
+      angle: powerBar.angle,
+      position: calculateTrajectory()
     }
-    const dx = getDistanceX(powerBar, frame / ballFrames)
-    const dy = getDistanceY(powerBar, frame / ballFrames)
-    state.delta = { x: ball.position.x - dx, y: ball.position.y - dy }
+
+    const dx = getDistanceX(temp, frame / ballFrames)
+    const dy = getDistanceY(temp, frame / ballFrames)
+    newPosition = { x: ball.position.x - dx, y: ball.position.y - dy }
     ball.position.x = dx
     ball.position.y = dy
   } else {
     console.log('move not possible')
-    state.delta = { x: 0, y: 0 }
+    newPosition = { x: 0, y: 0 }
   }
 
-
   cameraMovables.forEach(movable => {
-    movable.position.x += state.delta.x * movable.scale
-    movable.position.y += state.delta.y * movable.scale
+    movable.position.x += newPosition.x * movable.scale
+    movable.position.y += newPosition.y * movable.scale
   })
 
   if (frame < ballFrames) {
     frame++
-    window.requestAnimationFrame(animateBall)
+    secondaryLoop = window.requestAnimationFrame(animateBall)
   } else {
     state.camera = 'player'
+    state.portal = ''
     ballTarget.visible = false
     frame = 0
     ballFrames = MAX_BALL_FRAMES
-    window.requestAnimationFrame(animateBackToPlayer)
+    secondaryLoop = window.requestAnimationFrame(animateBackToPlayer)
+  }
+}
+
+const calculateTrajectory = () => {
+  if (state.portal === '') {
+    return powerBar.position
+  } else if (state.portal === portalA.name) {
+    return {
+      x: portalA.position.x + portalA.width,
+      y: portalA.position.y + portalA.height
+    }
+  } else if (state.portal === portalB.name) {
+    return {
+      x: portalB.position.x + portalB.width + (player.position.x - player.width - portalA.position.x),
+      y: portalB.position.y + portalB.height + (player.position.y - player.height - portalA.position.y)
+    }
   }
 }
 
@@ -394,12 +445,31 @@ const animateBackToPlayer = () => {
     movable.position.y += state.delta.y * movable.scale * frame / ballFrames
   })
 
-  if (frame < ballFrames && (Math.abs(dx) > 0 && Math.abs(dy) > 0)) {
+  if (frame < ballFrames && (Math.abs(dx) > 0.1 && Math.abs(dy) > 0.1)) {
     frame++
-    window.requestAnimationFrame(animateBackToPlayer)
+    secondaryLoop = window.requestAnimationFrame(animateBackToPlayer)
   } else {
     frame = 0
     state.delta = { x: 0, y: 0 }
+  }
+}
+
+const animatePortal = () => {
+  console.log('animate portal')
+  if (state.portal === 'a') {
+    ball.position.x = portalA.position.x + portalA.width - ball.position.x + getDistanceX(portalB, frame / ballFrames)
+    ball.position.y = portalA.position.y + portalA.height - ball.position.y + getDistanceY(portalB, frame / ballFrames)
+  } else if (state.portal === 'b') {
+    ball.position.x = portalB.position.x + portalB.width - ball.position.x + getDistanceX(portalA, frame / ballFrames)
+    ball.position.y = portalB.position.y + portalB.height - ball.position.y + getDistanceY(portalA, frame / ballFrames)
+  }
+
+  if (frame < ballFrames) {
+    frame++
+    secondaryLoop = window.requestAnimationFrame(animatePortal)
+  } else {
+    state.portal = ''
+    frame = 0
   }
 }
 

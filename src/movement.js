@@ -1,7 +1,7 @@
 const isColliding = (object, collider) => {
   const temp = getOverlap(object, collider)
   if (temp[0] > 0 && temp[1] > 0) {
-    console.log(`${object.name} overlapping ${collider.name}`)
+    // console.log(`${object.name} overlapping ${collider.name}`)
     return true
   }
   if (object.shape === 'circle' && collider.shape === 'circle') {
@@ -22,7 +22,7 @@ const isColliding = (object, collider) => {
     object.position.y + objectHeight > collider.position.y &&
     object.position.y < collider.position.y + colliderHeight
     && object.position.z <= collider.position.z
-  result && console.log(`${object.name} colliding ${collider.name}`)
+  // result && console.log(`${object.name} colliding ${collider.name}`)
   return result
 }
 
