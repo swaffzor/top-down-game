@@ -1,5 +1,6 @@
 if (window.innerHeight < window.innerWidth) {
   document.getElementById('dpad').style.display = 'none'
+  document.getElementById('button-enter').style.display = 'none'
 }
 
 const stopMoving = () => {
@@ -35,6 +36,7 @@ const buttonUp = document.getElementById('button-up')
 const buttonDown = document.getElementById('button-down')
 const buttonLeft = document.getElementById('button-left')
 const buttonRight = document.getElementById('button-right')
+const buttonEnter = document.getElementById('button-enter')
 buttonUp.addEventListener('touchstart', () => move('up'))
 buttonUp.addEventListener('touchend', stopMoving)
 buttonDown.addEventListener('touchstart', () => move('down'))
@@ -43,3 +45,10 @@ buttonLeft.addEventListener('touchstart', () => move('left'))
 buttonLeft.addEventListener('touchend', stopMoving)
 buttonRight.addEventListener('touchstart', () => move('right'))
 buttonRight.addEventListener('touchend', stopMoving)
+buttonEnter.addEventListener('touchstart', () => {
+  keys.enter.pressed = true
+  lastKey = 'enter'
+})
+buttonEnter.addEventListener('touchend', () => {
+  keys.enter.pressed = false
+})
