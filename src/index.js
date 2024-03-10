@@ -348,15 +348,12 @@ const ballPointer = new Collider({
     const distanceToBall = Math.sqrt(deltaXB * deltaXB + deltaYB * deltaYB)
     const deltaXE = screenEdgePoint.x - camera.position.x
     const deltaYE = screenEdgePoint.y - camera.position.y
-    const distanceScreen = Math.sqrt(deltaXE * deltaXE + deltaYE * deltaYE) * 3 / 4
-    if (distanceToBall < distanceScreen) return
+    const distPlayer2Screen = Math.sqrt(deltaXE * deltaXE + deltaYE * deltaYE)
+    if (distanceToBall < distPlayer2Screen) return
     const angleScreen = Math.atan2(deltaYE, deltaXE)
 
-    const deltaXSB = screenEdgePoint.x - ball.position.x
-    const deltaYSB = screenEdgePoint.y - ball.position.y
-    const distanceScreenToBall = Math.sqrt(deltaXSB * deltaXSB + deltaYSB * deltaYSB)
-    const scale = distanceScreen > distanceScreenToBall ? distanceScreen : distanceScreen + distanceScreenToBall
-
+    const distanceBall2Screen = distanceToBall - distPlayer2Screen
+    const scale = distanceBall2Screen > distPlayer2Screen / 4 ? distPlayer2Screen * 3 / 4 : distPlayer2Screen - distanceBall2Screen
     const arrowStemEnd = {
       x: camera.position.x + Math.cos(angleScreen) * scale,
       y: camera.position.y + Math.sin(angleScreen) * scale,
