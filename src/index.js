@@ -5,13 +5,13 @@ const context = canvas.getContext("2d")
 canvas.width = 1150  //* 16
 canvas.height = 600 //* 9
 
-// 303 is start
-// 304 is portal
-// 607 is hole
+const startVal = 303
+const portalVal = 304
+const holeVal = 607
 const metaLayer = meta.layers.find(layer => layer.name === 'meta').data
-const playerStartIndex = metaLayer.findIndex(cell => cell === 303)
-const portalIndexes = metaLayer.map((cell, index) => cell === 304 ? index : null).filter(cell => cell !== null)
-const holeIndex = metaLayer.findIndex(cell => cell === 607)
+const playerStartIndex = metaLayer.findIndex(cell => cell === startVal)
+const portalIndexes = metaLayer.map((cell, index) => cell === portalVal ? index : null).filter(cell => cell !== null)
+const holeIndex = metaLayer.findIndex(cell => cell === holeVal)
 const canvasscale = 1;
 
 const levelStart = {
@@ -137,7 +137,6 @@ const player = new Sprite({
     idleLeft: playerIdleLeft,
     idleRight: playerIdleRight,
   },
-  visible: false,
   onLoad: (width, height) => {
     powerBar.position = { x: camera.position.x + 2, y: camera.position.y + 2 }
     clubRadius.position = { x: player.position.x + width / 2, y: player.position.y + height / 2 }
@@ -158,6 +157,19 @@ const hole = new Sprite({
   fillStyle: 'rgba(255, 0, 0, 0)'
 })
 
+const golfClub = new Sprite({
+  name: 'golfClub',
+  image: './sprites/golf-swing-Sheet.png',
+  position: { x: player.position.x - 12, y: player.position.y - 15, z: 0 },
+  frames: { max: 10 },
+  shape: 'rect',
+  isAnimating: false,
+  flipVertical: false,
+  flipHorizontal: false,
+  visible: false,
+  // showBorder: true,
+  animationSpeed: 1,
+})
 const ball = new Collider({
   name: 'ball',
   position: { x: player.position.x, y: player.position.y + 10, z: 0 },
@@ -402,6 +414,7 @@ let cameraMovables = [
   player,
   powerBar,
   clubRadius,
+  golfClub,
   ...boundaries,
   ...grounds,
 ]
@@ -416,6 +429,7 @@ let drawables = [
   ball,
   clubRadius,
   player,
+  golfClub,
   debugBall,
   holePointer,
   ballPointer,
@@ -424,6 +438,9 @@ let drawables = [
 let portals = [portalA, portalB]
 
 let state = {
+  interval: 1000 / 60, // 60 fps
+  timer: 0,
+  lastTime: 0,
   mode: 'move',
   par: 3,
   strokes: 0,
@@ -433,8 +450,8 @@ let state = {
 }
 
 
-const STEP = 1
-const RUN = 2
+const STEP = 3
+const RUN = 6
 const OFFSET = 0
 const MAX_BALL_FRAMES = 200
 let barDirection = ''
@@ -445,8 +462,6 @@ let frame = 0
 let ballHasPortaled = false
 let timeOutValue = 0
 let radiusTimeout = 0
-
-animate()
 
 const mouse = {
   x: 0,

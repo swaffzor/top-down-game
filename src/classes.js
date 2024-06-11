@@ -1,7 +1,24 @@
 const GRAVITY = 2
 
 class Sprite {
-  constructor({ image, position, velocity, frames = { max: 1 }, sprites, direction, width, name, onLoad, scale = 1 }) {
+  constructor({ image,
+    animationSpeed = 10,
+    direction,
+    flipHorizontal = false,
+    flipVertical = false,
+    frames = { max: 1 },
+    isAnimating = true,
+    name,
+    onLoad,
+    position,
+    scale = 1,
+    showBorder = false,
+    sprites,
+    strokeStyle = 'rgba(255, 0, 0, 0.8)',
+    velocity,
+    visible = true,
+    width,
+  }) {
     this.name = name
     this.image = new Image()
     this.image.src = image
@@ -26,13 +43,28 @@ class Sprite {
     this.moving = false
     this.running = false
     this.jumping = 0
-    this.visible = true
+    this.visible = visible
     this.shape = 'rect'
     this.scale = scale
+    this.isAnimating = isAnimating
+    this.flipVertical = flipVertical
+    this.flipHorizontal = flipHorizontal
+    this.showBorder = showBorder
+    this.strokeStyle = strokeStyle
+    this.animationSpeed = animationSpeed
   }
 
   draw() {
     if (!this.visible) return
+    if (this.flipHorizontal || this.flipVertical) context.save()
+    if (this.flipHorizontal) {
+      context.scale(-1, 1)
+      context.translate(-this.position.x * 2 - this.width, 0)
+    }
+    if (this.flipVertical) {
+      context.scale(1, -1)
+      context.translate(0, -this.position.y * 2 - this.height)
+    }
     context.drawImage(                    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
       this.image,                         // image source, the spritesheet
       this.frames.val * this.width,       // image start x, selects which sprite to start rendering from the spritesheet
@@ -44,6 +76,14 @@ class Sprite {
       this.image.width / this.frames.max, // canvas destination width, scales the image on the canvas, same scale in this case
       this.image.height,                  // canvas destination height, scales the image on the canvas, same scale in this case
     )
+
+    if (this.flipHorizontal || this.flipVertical) context.restore()
+
+
+    if (this.showBorder) {
+      context.strokeStyle = this.strokeStyle
+      context.strokeRect(this.position.x, this.position.y, this.width, this.height)
+    }
 
     // jumping
     if (this.jumping > 0) {
@@ -68,7 +108,8 @@ class Sprite {
     // context.strokeRect(this.position.x, this.position.y, this.width, this.height,)
 
     // frame/animation management
-    const animationSpeed = this.running ? 5 : 10 // lower is faster
+    const animationSpeed = this.running ? this.animationSpeed / 2 : this.animationSpeed // lower is faster
+    if (!this.isAnimating) return
     if (this.frames.max > 1) this.frames.elapsed++
     if (this.frames.elapsed % animationSpeed === 0) {
       if (this.frames.val < this.frames.max - 1) this.frames.val++

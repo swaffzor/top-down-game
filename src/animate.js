@@ -1,6 +1,10 @@
 let animationLoop
 let secondaryLoop
 
+window.onload = () => {
+  animate()
+}
+
 const draw = () => {
   context.fillStyle = "#0099cc" // ocean blue
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -9,11 +13,12 @@ const draw = () => {
   // debugDraw()
 }
 
-let lastTime = 0
 const animate = (timeStamp) => {
-  const deltaTime = timeStamp - lastTime
-  lastTime = timeStamp
-
+  const deltaTime = timeStamp - state.lastTime
+  state.lastTime = timeStamp
+  state.timer ? null : state.timer = 0
+  // if (state.timer > state.interval) {
+  // if (true) {
   draw()
 
   if (keys.w.pressed) {
@@ -153,6 +158,11 @@ const animate = (timeStamp) => {
   } else if (state.portal === "" && isColliding(portalB, ball)) {
     portalToPortal(portalB, portalA)
   }
+
+  state.timer = 0
+  // } else {
+  //   state.timer += deltaTime
+  // }
 
   document.getElementById('stat1').innerHTML = `<strong> Par ${state.par} | Strokes ${state.strokes}</strong > `
   document.getElementById('stat2').innerHTML = `<strong> Club: ${parseInt(club.name) ? club.name + ' Iron' : club.name === 'w' ? 'Wedge' : 'Putter'}</strong > <br /> Ball: x: ${Math.floor(ball.position.x)}, y: ${Math.floor(ball.position.y)} z: ${Math.floor(ball.position.z)}, w: ${Math.floor(ball.width)} `
@@ -345,6 +355,7 @@ const animateCameraTo = () => {
 }
 
 const animateBall = () => {
+  console.log('animate ball')
   // arc motion
   const gravity = 3
   const dz = (ballFrames * frame - 0.5 * gravity * Math.pow(frame, 2)) / ballFrames * powerBar.height / club.max
@@ -470,6 +481,25 @@ const animatePortal = () => {
   } else {
     state.portal = ''
     frame = 0
+  }
+}
+
+const animateSwing = () => {
+  console.log('animate swing')
+
+  if (golfClub.frames.val + 1 < golfClub.frames.max) {
+    window.requestAnimationFrame(animateSwing)
+  } else {
+    // debugger
+    golfClub.frames.val = 0
+    golfClub.isAnimating = false
+    golfClub.visible = false
+    // golfClub.flipVertical = true
+    // if (golfClub.frames.val === 4) {
+    state.mode = 'move'
+    state.camera = 'ball'
+    window.requestAnimationFrame(animateBall)
+    // }
   }
 }
 

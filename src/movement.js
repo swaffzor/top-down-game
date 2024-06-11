@@ -41,6 +41,9 @@ const isMovePossible = (movable) => {
 const makePlayerMove = (direction) => {
   if (state.mode === "move") player.direction = direction
   player.image = player.sprites[direction]
+  if (["left", "right"].includes(direction)) {
+    golfClub.flipHorizontal = direction === "left"
+  }
 
   const axis = direction === 'down' || direction === 'up' ? 'y' : 'x'
   const polarity = direction === 'up' || direction === 'left' ? 1 : -1

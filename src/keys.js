@@ -63,6 +63,7 @@ window.addEventListener('keydown', (event) => {
         barDirection = 'grow'
         state.mode = 'rotateBar'
         powerBar.visible = false
+        golfClub.visible = true
         barAngleSpeed = club.barAngleSpeed
         if (player.direction === 'up' && powerBar.direction !== 'up') {
           powerBar.angle = 2 * Math.PI // starting at 2PI to avoid jittering when rotating back to 0
@@ -95,9 +96,11 @@ window.addEventListener('keydown', (event) => {
         ballFrames = MAX_BALL_FRAMES * powerBar.height / club.max
         state.strokes++
         // state.portal = ""
-        state.mode = 'move'
-        state.camera = 'ball'
-        animationLoop = window.requestAnimationFrame(animateBall)
+        // state.mode = 'move'
+        // state.camera = 'ball'
+        golfClub.flipVertical = false
+        golfClub.isAnimating = true
+        animationLoop = window.requestAnimationFrame(animateSwing)
       }
       break
     case 'Escape':
@@ -217,8 +220,26 @@ window.addEventListener('keydown', (event) => {
       player.running = true
       keys.shift.pressed = true
       break;
+    case '0': {
+      keys['0'].pressed = true
+      club.name = 'p'
+      club = { ...club.bag[club.name], bag: { ...club.bag }, max: club.bag[club.name].max }
+      radiusTimeout && clearTimeout(radiusTimeout)
+      clubRadius.visible = true
+      clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
+      clubRadius.width = club.max
+    }
     default:
       break;
+  }
+  if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) {
+    keys[event.key].pressed = true
+    club.name = event.key
+    club = { ...club.bag[club.name], bag: { ...club.bag }, max: club.bag[club.name].max }
+    radiusTimeout && clearTimeout(radiusTimeout)
+    clubRadius.visible = true
+    clubRadius.strokeStyle = club.name === 'p' ? 'rgba(0, 255, 0, 0.5)' : club.name === 'w' ? 'rgba:(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)'
+    clubRadius.width = club.max
   }
   console.log('pressed', event.key)
 })
@@ -335,9 +356,18 @@ window.addEventListener('keyup', (event) => {
       player.running = false
       keys.shift.pressed = false
       break;
+    case '0':
+      keys['0'].pressed = false
+      eraseClubRadius()
+      break;
 
     default:
       break;
+  }
+
+  if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) {
+    keys[event.key].pressed = false
+    eraseClubRadius()
   }
 })
 
@@ -418,6 +448,36 @@ const keys = {
     pressed: false,
   },
   shift: {
+    pressed: false,
+  },
+  1: {
+    pressed: false,
+  },
+  2: {
+    pressed: false,
+  },
+  3: {
+    pressed: false,
+  },
+  4: {
+    pressed: false,
+  },
+  5: {
+    pressed: false,
+  },
+  6: {
+    pressed: false,
+  },
+  7: {
+    pressed: false,
+  },
+  8: {
+    pressed: false,
+  },
+  9: {
+    pressed: false,
+  },
+  0: {
     pressed: false,
   },
 }
